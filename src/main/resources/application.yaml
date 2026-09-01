@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: job-radar
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/opc_job_radar
+    username: opc
+    password: opc
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true

@@ -1,0 +1,21 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: job-radar-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: opc
+      POSTGRES_PASSWORD: opc
+      POSTGRES_DB: opc_job_radar
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - opc-job-radar-data:/var/lib/postgresql/data
+
+volumes:
+  opc-job-radar-data:
+    driver: local
