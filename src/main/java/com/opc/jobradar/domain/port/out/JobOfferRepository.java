@@ -13,5 +13,7 @@ public interface JobOfferRepository {
     Optional<JobOffer> findByUrl(String url);
 
     boolean existsByUrl(String url);
+
+    boolean existsBySourceAndExternalId(String source, String externalId);
     
 }

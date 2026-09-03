@@ -47,4 +47,12 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
     public boolean existsByUrl(String url) {
         return repository.existsByUrl(url);
     }
+
+    @Override
+    public boolean existsBySourceAndExternalId(
+            String source,
+            String externalId
+    ) {
+        return repository.existsBySourceAndExternalId(source, externalId);
+    }
 }

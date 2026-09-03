@@ -25,7 +25,9 @@ public class JobOfferMapper {
                 entity.getClassification(),
                 entity.getDescription(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getSource(),
+                entity.getExternalId()
         );
     }
 
@@ -49,6 +51,8 @@ public class JobOfferMapper {
         entity.setDescription(domain.getDescription());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getUpdatedAt());
+        entity.setSource(domain.getSource());
+        entity.setExternalId(domain.getExternalId());
 
         return entity;
     }

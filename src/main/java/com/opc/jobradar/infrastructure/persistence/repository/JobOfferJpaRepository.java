@@ -10,4 +10,6 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
     boolean existsByUrl(String url);
 
     Optional<JobOfferEntity> findByUrl(String url);
+
+    boolean existsBySourceAndExternalId(String source, String externalId);
 }

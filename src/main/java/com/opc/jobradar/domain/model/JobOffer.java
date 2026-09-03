@@ -17,6 +17,8 @@ public class JobOffer {
     private String description;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private String source;
+    private String externalId;
 
     public JobOffer() {
     }
@@ -34,7 +36,9 @@ public class JobOffer {
             String classification,
             String description,
             OffsetDateTime createdAt,
-            OffsetDateTime updatedAt
+            OffsetDateTime updatedAt,
+            String source,
+            String externalId
     ) {
         this.id = id;
         this.company = company;
@@ -49,6 +53,8 @@ public class JobOffer {
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.source = source;
+        this.externalId = externalId;
     }
 
     public Long getId() {
@@ -103,6 +109,14 @@ public class JobOffer {
         return updatedAt;
     }
 
+      public String getSource() {
+        return source;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -153,5 +167,13 @@ public class JobOffer {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 }

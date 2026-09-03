@@ -32,6 +32,12 @@ public class JobOfferEntity {
     @Column(nullable = false)
     private String url;
 
+    @Column(nullable = false, length = 100)
+    private String source;
+
+    @Column(name = "external_id", nullable = false, length = 100)
+    private String externalId;
+
     @Column(name = "published_at")
     private OffsetDateTime publishedAt;
 
@@ -74,6 +80,14 @@ public class JobOfferEntity {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 
     public OffsetDateTime getPublishedAt() {
@@ -126,6 +140,14 @@ public class JobOfferEntity {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public void setPublishedAt(OffsetDateTime publishedAt) {
