@@ -5,12 +5,16 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class GetJobOffersServiceTest {
@@ -55,7 +59,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(jobOffers);
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -86,7 +90,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(googleOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -116,7 +120,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(madridOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -146,7 +150,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(remoteOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -176,7 +180,7 @@ class GetJobOffersServiceTest {
                 JobOfferStatus.SOLICITADA
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(requestedOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -206,7 +210,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(remoteMadridOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -236,7 +240,7 @@ class GetJobOffersServiceTest {
                 JobOfferStatus.SOLICITADA
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(requestedRemoteMadridOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -266,7 +270,7 @@ class GetJobOffersServiceTest {
                 JobOfferStatus.SOLICITADA
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(matchingOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -319,18 +323,33 @@ class GetJobOffersServiceTest {
                         JobOfferStatus.SOLICITADA
                 );
 
-        when(jobOfferRepository.findAll(madridFilters))
+        when(jobOfferRepository.findAll(argThat(filters ->
+                filters != null
+                        && "Madrid".equals(filters.getLocation())
+                        && filters.getWorkMode() == null
+                        && filters.getStatus() == null
+        )))
                 .thenReturn(List.of(
                         remoteMadridRequested,
                         hybridMadridRequested
                 ));
 
-        when(jobOfferRepository.findAll(madridRemoteFilters))
+        when(jobOfferRepository.findAll(argThat(filters ->
+                filters != null
+                        && "Madrid".equals(filters.getLocation())
+                        && "REMOTO".equals(filters.getWorkMode())
+                        && filters.getStatus() == null
+        )))
                 .thenReturn(List.of(
                         remoteMadridRequested
                 ));
 
-        when(jobOfferRepository.findAll(madridRemoteRequestedFilters))
+        when(jobOfferRepository.findAll(argThat(filters ->
+                filters != null
+                        && "Madrid".equals(filters.getLocation())
+                        && "REMOTO".equals(filters.getWorkMode())
+                        && filters.getStatus() == JobOfferStatus.SOLICITADA
+        )))
                 .thenReturn(List.of(
                         remoteMadridRequested
                 ));
@@ -374,7 +393,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(madridOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -396,7 +415,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of());
 
         List<JobOffer> result = getJobOffersService.get(filters);
@@ -433,7 +452,7 @@ class GetJobOffersServiceTest {
                 null
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(
                         madridOffer,
                         barcelonaOffer
@@ -465,13 +484,41 @@ class GetJobOffersServiceTest {
                 JobOfferStatus.SOLICITADA
         );
 
-        when(jobOfferRepository.findAll(filters))
+        when(jobOfferRepository.findAll(any(FiltersByJobOffer.class)))
                 .thenReturn(List.of(requestedMadridOffer));
 
         List<JobOffer> result = getJobOffersService.get(filters);
 
         assertEquals(1, result.size());
         assertSame(requestedMadridOffer, result.get(0));
+    }
+
+    // ============================================================
+    // CT-009 - Normalización de filtros vacíos
+    // ============================================================
+
+    @Test
+    void shouldNormalizeEmptyFiltersBeforeCallingRepository() {
+        FiltersByJobOffer filters = new FiltersByJobOffer(
+                "",
+                "Madrid",
+                "",
+                null
+        );
+
+        getJobOffersService.get(filters);
+
+        ArgumentCaptor<FiltersByJobOffer> captor =
+                ArgumentCaptor.forClass(FiltersByJobOffer.class);
+
+        verify(jobOfferRepository).findAll(captor.capture());
+
+        FiltersByJobOffer capturedFilters = captor.getValue();
+
+        assertEquals(null, capturedFilters.getCompany());
+        assertEquals("Madrid", capturedFilters.getLocation());
+        assertEquals(null, capturedFilters.getWorkMode());
+        assertEquals(null, capturedFilters.getStatus());
     }
 
     private JobOffer createJobOffer(
