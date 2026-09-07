@@ -4,9 +4,22 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
 import org.springframework.stereotype.Component;
 
+/**
+ * Convierte ofertas entre el modelo de dominio y la entidad de persistencia.
+ *
+ * Centraliza esta conversión para evitar que los detalles de JPA se filtren
+ * hacia las capas internas.
+ */
 @Component
 public class JobOfferMapper {
 
+    /**
+     * Convierte una entidad JPA en una oferta de dominio.
+     *
+     * @param entity entidad obtenida de persistencia
+     * @return oferta de dominio equivalente, o {@code null} si la entidad es
+     *         {@code null}
+     */
     public JobOffer toDomain(JobOfferEntity entity) {
         if (entity == null) {
             return null;
@@ -31,6 +44,13 @@ public class JobOfferMapper {
         );
     }
 
+    /**
+     * Convierte una oferta de dominio en una entidad JPA.
+     *
+     * @param domain oferta de dominio que se quiere persistir
+     * @return entidad equivalente, o {@code null} si la oferta es
+     *         {@code null}
+     */
     public JobOfferEntity toEntity(JobOffer domain) {
         if (domain == null) {
             return null;

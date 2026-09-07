@@ -4,6 +4,10 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import org.springframework.stereotype.Service;
 
+/**
+ * Caso de uso que crea ofertas de empleo después de validar los datos mínimos
+ * y su identidad dentro de una fuente.
+ */
 @Service
 public class CreateJobOfferService {
 

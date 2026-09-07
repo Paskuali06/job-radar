@@ -4,6 +4,12 @@ import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
 
+/**
+ * Entidad JPA que representa la tabla {@code job_offer}.
+ *
+ * Se mantiene separada de {@code JobOffer} para que los detalles de JPA no
+ * formen parte del modelo de dominio.
+ */
 @Entity
 @Table(
         name = "job_offer",

@@ -2,6 +2,12 @@ package com.opc.jobradar.domain.model;
 
 import java.time.OffsetDateTime;
 
+/**
+ * Representa una oferta de empleo dentro del dominio de Job Radar.
+ *
+ * Mantiene los datos con los que la aplicación identifica, clasifica y
+ * consulta una oferta sin depender de detalles de persistencia.
+ */
 public class JobOffer {
 
     private Long id;

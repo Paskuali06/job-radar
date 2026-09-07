@@ -3,6 +3,9 @@ package com.opc.jobradar;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Punto de entrada de la aplicación Spring Boot de Job Radar.
+ */
 @SpringBootApplication
 public class JobRadarApplication {
 

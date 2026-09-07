@@ -9,6 +9,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Adaptador de salida que implementa el puerto de ofertas mediante JPA.
+ *
+ * Convierte el modelo de dominio a entidades JPA antes de persistirlas y
+ * realiza la conversión inversa al devolver resultados a la aplicación.
+ */
 @Component
 public class JobOfferPersistenceAdapter implements JobOfferRepository {
 
