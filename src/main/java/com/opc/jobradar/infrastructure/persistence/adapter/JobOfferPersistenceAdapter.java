@@ -1,5 +1,6 @@
 package com.opc.jobradar.infrastructure.persistence.adapter;
 
+import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
@@ -7,6 +8,7 @@ import com.opc.jobradar.infrastructure.persistence.mapper.JobOfferMapper;
 import com.opc.jobradar.infrastructure.persistence.repository.JobOfferJpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -60,5 +62,20 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
             String externalId
     ) {
         return repository.existsBySourceAndExternalId(source, externalId);
+    }
+
+    @Override
+    public List<JobOffer> findAll(FiltersByJobOffer filters) {
+        return repository.findAll(
+                        filters.getCompany(),
+                        filters.getLocation(),
+                        filters.getWorkMode(),
+                        filters.getStatus() == null
+                                ? null
+                                : filters.getStatus().name()
+                )
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

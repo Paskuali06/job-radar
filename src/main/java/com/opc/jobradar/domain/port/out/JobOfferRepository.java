@@ -1,7 +1,9 @@
 package com.opc.jobradar.domain.port.out;
 
+import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,5 +55,12 @@ public interface JobOfferRepository {
      * @return {@code true} si ya existe esa identidad
      */
     boolean existsBySourceAndExternalId(String source, String externalId);
-    
+
+    /**
+     * Consulta las ofertas de empleo aplicando los filtros proporcionados.
+     *
+     * @param filters filtros opcionales de consulta
+     * @return lista de ofertas que cumplen los filtros
+     */
+    List<JobOffer> findAll(FiltersByJobOffer filters);
 }
