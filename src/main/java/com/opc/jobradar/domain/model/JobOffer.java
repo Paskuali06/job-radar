@@ -17,7 +17,7 @@ public class JobOffer {
     private String workMode;
     private String url;
     private OffsetDateTime publishedAt;
-    private String status;
+    private JobOfferStatus status;
     private Integer score;
     private String classification;
     private String description;
@@ -37,7 +37,7 @@ public class JobOffer {
             String workMode,
             String url,
             OffsetDateTime publishedAt,
-            String status,
+            JobOfferStatus status,
             Integer score,
             String classification,
             String description,
@@ -91,7 +91,7 @@ public class JobOffer {
         return publishedAt;
     }
 
-    public String getStatus() {
+    public JobOfferStatus getStatus() {
         return status;
     }
 
@@ -151,7 +151,7 @@ public class JobOffer {
         this.publishedAt = publishedAt;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(JobOfferStatus status) {
         this.status = status;
     }
 

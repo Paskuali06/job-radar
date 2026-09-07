@@ -1,6 +1,7 @@
 package com.opc.jobradar.application.service;
 
 import com.opc.jobradar.domain.model.JobOffer;
+import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import org.springframework.stereotype.Service;
 
@@ -64,6 +65,10 @@ public class CreateJobOfferService {
             throw new IllegalArgumentException(
                     "Job offer with the same source and external ID already exists."
             );
+        }
+
+        if (jobOffer.getStatus() == null) {
+            jobOffer.setStatus(JobOfferStatus.PENDIENTE);
         }
 
         // La oferta ha superado las validaciones y puede persistirse.

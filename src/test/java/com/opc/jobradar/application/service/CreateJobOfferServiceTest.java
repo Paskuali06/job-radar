@@ -1,6 +1,7 @@
 package com.opc.jobradar.application.service;
 
 import com.opc.jobradar.domain.model.JobOffer;
+import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +41,38 @@ class CreateJobOfferServiceTest {
 
         assertNotNull(result);
         assertSame(jobOffer, result);
+
+        verify(jobOfferRepository).existsBySourceAndExternalId(
+                "LinkedIn",
+                "123"
+        );
+
+        verify(jobOfferRepository).save(jobOffer);
+    }
+
+    // ============================================================
+    // CT-008 - Una oferta nueva sin estado comienza en PENDIENTE
+    // ============================================================
+
+    @Test
+    void shouldAssignPendingStatusWhenCreatingJobOfferWithoutStatus() {
+        JobOffer jobOffer = new JobOffer();
+        jobOffer.setSource("LinkedIn");
+        jobOffer.setExternalId("123");
+        jobOffer.setUrl("https://linkedin.com/jobs/123");
+
+        when(jobOfferRepository.existsBySourceAndExternalId(
+                "LinkedIn",
+                "123"
+        )).thenReturn(false);
+
+        when(jobOfferRepository.save(jobOffer))
+                .thenReturn(jobOffer);
+
+        JobOffer result = createJobOfferService.create(jobOffer);
+
+        assertSame(jobOffer, result);
+        assertEquals(JobOfferStatus.PENDIENTE, result.getStatus());
 
         verify(jobOfferRepository).existsBySourceAndExternalId(
                 "LinkedIn",

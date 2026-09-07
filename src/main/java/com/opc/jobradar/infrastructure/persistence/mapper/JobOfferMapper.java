@@ -1,6 +1,7 @@
 package com.opc.jobradar.infrastructure.persistence.mapper;
 
 import com.opc.jobradar.domain.model.JobOffer;
+import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,9 @@ public class JobOfferMapper {
                 entity.getWorkMode(),
                 entity.getUrl(),
                 entity.getPublishedAt(),
-                entity.getStatus(),
+                entity.getStatus() == null
+                        ? null
+                        : JobOfferStatus.valueOf(entity.getStatus()),
                 entity.getScore(),
                 entity.getClassification(),
                 entity.getDescription(),
@@ -65,7 +68,9 @@ public class JobOfferMapper {
         entity.setWorkMode(domain.getWorkMode());
         entity.setUrl(domain.getUrl());
         entity.setPublishedAt(domain.getPublishedAt());
-        entity.setStatus(domain.getStatus());
+        entity.setStatus(
+                domain.getStatus() == null ? null : domain.getStatus().name()
+        );
         entity.setScore(domain.getScore());
         entity.setClassification(domain.getClassification());
         entity.setDescription(domain.getDescription());
