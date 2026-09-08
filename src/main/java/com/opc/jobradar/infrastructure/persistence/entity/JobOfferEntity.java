@@ -12,10 +12,7 @@ import java.time.OffsetDateTime;
  */
 @Entity
 @Table(
-        name = "job_offer",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_job_offer_url", columnNames = "url")
-        }
+        name = "job_offer"
 )
 public class JobOfferEntity {
 
