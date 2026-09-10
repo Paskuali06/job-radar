@@ -1,5 +1,6 @@
 package com.opc.jobradar.application.service;
 
+import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
@@ -8,6 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class CreateJobOfferServiceTest {
@@ -98,13 +101,13 @@ class CreateJobOfferServiceTest {
                 "123"
         )).thenReturn(true);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        JobOfferAlreadyExistsException exception = assertThrows(
+                JobOfferAlreadyExistsException.class,
                 () -> createJobOfferService.create(jobOffer)
         );
 
         assertEquals(
-                "Job offer with the same source and external ID already exists.",
+                "Esta oferta ya existe",
                 exception.getMessage()
         );
 
@@ -331,13 +334,13 @@ class CreateJobOfferServiceTest {
                 "123"
         )).thenReturn(true);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        JobOfferAlreadyExistsException exception = assertThrows(
+                JobOfferAlreadyExistsException.class,
                 () -> createJobOfferService.create(jobOffer)
         );
 
         assertEquals(
-                "Job offer with the same source and external ID already exists.",
+                "Esta oferta ya existe",
                 exception.getMessage()
         );
 
@@ -350,5 +353,34 @@ class CreateJobOfferServiceTest {
                 .existsByUrl(anyString());
 
         verify(jobOfferRepository, never()).save(any());
+    }
+
+    // ============================================================
+    // CT-016 - Rechazar oferta duplicada
+    // ============================================================
+
+    @Test
+    void shouldThrowExceptionWhenJobOfferAlreadyExists() {
+        JobOfferRepository repository = mock(JobOfferRepository.class);
+
+        JobOffer jobOffer = new JobOffer();
+        jobOffer.setUrl("https://example.com/job");
+        jobOffer.setSource("LINKEDIN");
+        jobOffer.setExternalId("123");
+
+        when(repository.existsBySourceAndExternalId(
+                "LINKEDIN",
+                "123"
+        )).thenReturn(true);
+
+        CreateJobOfferService service =
+                new CreateJobOfferService(repository);
+
+        assertThrows(
+                JobOfferAlreadyExistsException.class,
+                () -> service.create(jobOffer)
+        );
+
+        verify(repository, never()).save(jobOffer);
     }
 }

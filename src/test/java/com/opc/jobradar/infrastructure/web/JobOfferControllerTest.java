@@ -10,6 +10,7 @@ import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.application.service.UpdateJobOfferService;
+import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -453,5 +454,36 @@ class JobOfferControllerTest {
                             }
                             """))
             .andExpect(status().isNotFound());
+}
+    @Test
+    void shouldReturnConflictWhenCreatingExistingJobOffer() throws Exception {
+    CreateJobOfferRequest request = new CreateJobOfferRequest(
+            "Company",
+            "Java Developer",
+            "Madrid",
+            "Remoto",
+            "https://example.com/job",
+            "LINKEDIN",
+            "123"
+    );
+
+    when(createJobOfferService.create(any(JobOffer.class)))
+            .thenThrow(new JobOfferAlreadyExistsException());
+
+    mockMvc.perform(post("/job-offers")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                                "company": "Company",
+                                "title": "Java Developer",
+                                "location": "Madrid",
+                                "workMode": "Remoto",
+                                "url": "https://example.com/job",
+                                "source": "LINKEDIN",
+                                "externalId": "123"
+                            }
+                            """))
+            .andExpect(status().isConflict())
+            .andExpect(content().string("Esta oferta ya existe"));
 }
 }

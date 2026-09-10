@@ -1,5 +1,7 @@
 package com.opc.jobradar.infrastructure.web;
 
+import com.opc.jobradar.application.service.UpdateJobOfferService;
+import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import com.opc.jobradar.application.exception.JobOfferNotFoundException;
 import com.opc.jobradar.application.service.CreateJobOfferService;
 import com.opc.jobradar.application.service.GetJobOfferService;
@@ -10,6 +12,7 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.application.service.DeleteJobOfferService;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,10 +25,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.PutMapping;
-import com.opc.jobradar.application.service.UpdateJobOfferService;
+import org.springframework.http.HttpStatus;
+
 
 import java.net.URI;
 import java.util.List;
+
 
 /**
  * Adaptador HTTP para la gestión de ofertas de empleo.
@@ -203,5 +208,13 @@ public class JobOfferController {
     JobOffer updatedJobOffer = updateJobOfferService.update(id, jobOffer);
 
     return ResponseEntity.ok(updatedJobOffer);
+}
+    @ExceptionHandler(JobOfferAlreadyExistsException.class)
+    public ResponseEntity<String> handleJobOfferAlreadyExists(
+        JobOfferAlreadyExistsException exception) {
+
+    return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(exception.getMessage());
 }
 }
