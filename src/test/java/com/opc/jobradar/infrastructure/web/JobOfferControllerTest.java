@@ -9,13 +9,14 @@ import com.opc.jobradar.application.service.UpdateJobOfferStatusService;
 import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
+import com.opc.jobradar.application.service.UpdateJobOfferService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import java.util.List;
 
@@ -47,6 +48,9 @@ class JobOfferControllerTest {
     
     @MockitoBean
     private DeleteJobOfferService deleteJobOfferService;
+
+    @MockitoBean
+    private UpdateJobOfferService updateJobOfferService;
 
     @Test
     void shouldCreateJobOffer() throws Exception {
@@ -373,4 +377,81 @@ class JobOfferControllerTest {
                                 """))
                 .andExpect(status().isBadRequest());
     }
+    @Test
+    void shouldUpdateJobOffer() throws Exception {
+    JobOffer updatedJobOffer = new JobOffer(
+            1L,
+            "Nueva Empresa",
+            "Nuevo título",
+            "Barcelona",
+            "REMOTO",
+            "https://example.com/new-job",
+            null,
+            JobOfferStatus.PENDIENTE,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "LinkedIn",
+            "job-a"
+    );
+
+    when(updateJobOfferService.update(
+            org.mockito.ArgumentMatchers.eq(1L),
+            any(JobOffer.class)
+    )).thenReturn(updatedJobOffer);
+
+    mockMvc.perform(put("/job-offers/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                                "company": "Nueva Empresa",
+                                "title": "Nuevo título",
+                                "location": "Barcelona",
+                                "workMode": "REMOTO",
+                                "url": "https://example.com/new-job",
+                                "source": "LinkedIn",
+                                "externalId": "job-a"
+                            }
+                            """))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(content().json("""
+                    {
+                        "id": 1,
+                        "company": "Nueva Empresa",
+                        "title": "Nuevo título",
+                        "location": "Barcelona",
+                        "workMode": "REMOTO",
+                        "url": "https://example.com/new-job",
+                        "status": "PENDIENTE",
+                        "source": "LinkedIn",
+                        "externalId": "job-a"
+                    }
+                    """));
+}
+
+    @Test
+    void shouldReturnNotFoundWhenUpdatingNonExistingJobOffer() throws Exception {
+    when(updateJobOfferService.update(
+            org.mockito.ArgumentMatchers.eq(1L),
+            any(JobOffer.class)
+    )).thenThrow(new JobOfferNotFoundException());
+
+    mockMvc.perform(put("/job-offers/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                                "company": "Nueva Empresa",
+                                "title": "Nuevo título",
+                                "location": "Barcelona",
+                                "workMode": "REMOTO",
+                                "url": "https://example.com/new-job",
+                                "source": "LinkedIn",
+                                "externalId": "job-a"
+                            }
+                            """))
+            .andExpect(status().isNotFound());
+}
 }

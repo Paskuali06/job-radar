@@ -1,7 +1,6 @@
 package com.opc.jobradar.infrastructure.persistence.repository;
 
-import com.opc.jobradar.domain.model.FiltersByJobOffer;
-import com.opc.jobradar.domain.model.JobOfferStatus;
+
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

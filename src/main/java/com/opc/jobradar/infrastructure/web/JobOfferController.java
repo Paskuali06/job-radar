@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.bind.annotation.PutMapping;
+import com.opc.jobradar.application.service.UpdateJobOfferService;
 
 import java.net.URI;
 import java.util.List;
@@ -37,18 +39,21 @@ public class JobOfferController {
     private final GetJobOffersService getJobOffersService;
     private final UpdateJobOfferStatusService updateJobOfferStatusService;
     private final DeleteJobOfferService deleteJobOfferService;
+    private final UpdateJobOfferService updateJobOfferService;
 
     public JobOfferController(
             CreateJobOfferService createJobOfferService,
             GetJobOfferService getJobOfferService,
             GetJobOffersService getJobOffersService,
             UpdateJobOfferStatusService updateJobOfferStatusService,
-            DeleteJobOfferService deleteJobOfferService) {
+            DeleteJobOfferService deleteJobOfferService,
+            UpdateJobOfferService updateJobOfferService) {
         this.createJobOfferService = createJobOfferService;
         this.getJobOfferService = getJobOfferService;
         this.getJobOffersService = getJobOffersService;
         this.updateJobOfferStatusService = updateJobOfferStatusService;
         this.deleteJobOfferService = deleteJobOfferService;
+        this.updateJobOfferService = updateJobOfferService; 
     }
 
     /**
@@ -171,5 +176,32 @@ public class JobOfferController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
     deleteJobOfferService.delete(id);
     return ResponseEntity.noContent().build();
+}
+    @PutMapping("/{id}")
+    public ResponseEntity<JobOffer> update(
+        @PathVariable Long id,
+        @RequestBody UpdateJobOfferRequest request) {
+
+    JobOffer jobOffer = new JobOffer(
+            null,
+            request.company(),
+            request.title(),
+            request.location(),
+            request.workMode(),
+            request.url(),
+            request.publishedAt(),
+            null,
+            request.score(),
+            request.classification(),
+            request.description(),
+            null,
+            null,
+            null,
+            null
+    );
+
+    JobOffer updatedJobOffer = updateJobOfferService.update(id, jobOffer);
+
+    return ResponseEntity.ok(updatedJobOffer);
 }
 }
