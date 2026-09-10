@@ -63,4 +63,11 @@ public interface JobOfferRepository {
      * @return lista de ofertas que cumplen los filtros
      */
     List<JobOffer> findAll(FiltersByJobOffer filters);
+
+    /**
+     * Elimina una oferta de empleo por su identificador interno.
+     *
+     * @param id identificador de la oferta que se quiere eliminar
+     */
+    void deleteById(Long id);
 }

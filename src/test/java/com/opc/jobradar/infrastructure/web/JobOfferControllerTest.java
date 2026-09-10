@@ -1,8 +1,12 @@
 package com.opc.jobradar.infrastructure.web;
 
 import com.opc.jobradar.application.exception.JobOfferNotFoundException;
-import com.opc.jobradar.application.service.GetJobOfferService;
+import com.opc.jobradar.application.service.DeleteJobOfferService;
 import com.opc.jobradar.application.service.CreateJobOfferService;
+import com.opc.jobradar.application.service.GetJobOfferService;
+import com.opc.jobradar.application.service.GetJobOffersService;
+import com.opc.jobradar.application.service.UpdateJobOfferStatusService;
+import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import org.junit.jupiter.api.Test;
@@ -11,10 +15,14 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,9 +39,15 @@ class JobOfferControllerTest {
     @MockitoBean
     private GetJobOfferService getJobOfferService;
 
-    // ============================================================
-    // CT-010 - El sistema debe permitir crear una oferta de empleo mediante una petición HTTP POST
-    // ============================================================
+    @MockitoBean
+    private GetJobOffersService getJobOffersService;
+
+    @MockitoBean
+    private UpdateJobOfferStatusService updateJobOfferStatusService;
+    
+    @MockitoBean
+    private DeleteJobOfferService deleteJobOfferService;
+
     @Test
     void shouldCreateJobOffer() throws Exception {
         JobOffer createdJobOffer = new JobOffer(
@@ -88,53 +102,275 @@ class JobOfferControllerTest {
                         }
                         """));
     }
+
     @Test
     void shouldGetJobOfferById() throws Exception {
-    JobOffer jobOffer = new JobOffer(
-            1L,
-            "Empresa A",
-            "Backend Developer",
-            "Madrid",
-            "REMOTO",
-            "https://example.com/job-a",
-            null,
-            JobOfferStatus.PENDIENTE,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "LinkedIn",
-            "job-a"
-    );
+        JobOffer jobOffer = new JobOffer(
+                1L,
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "https://example.com/job-a",
+                null,
+                JobOfferStatus.PENDIENTE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "LinkedIn",
+                "job-a"
+        );
 
-    when(getJobOfferService.getById(1L))
-            .thenReturn(jobOffer);
+        when(getJobOfferService.getById(1L))
+                .thenReturn(jobOffer);
 
-    mockMvc.perform(get("/job-offers/1"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(content().json("""
-                    {
-                        "id": 1,
-                        "company": "Empresa A",
-                        "title": "Backend Developer",
-                        "location": "Madrid",
-                        "workMode": "REMOTO",
-                        "url": "https://example.com/job-a",
-                        "status": "PENDIENTE",
-                        "source": "LinkedIn",
-                        "externalId": "job-a"
-                    }
-                    """));
-}
+        mockMvc.perform(get("/job-offers/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("""
+                        {
+                            "id": 1,
+                            "company": "Empresa A",
+                            "title": "Backend Developer",
+                            "location": "Madrid",
+                            "workMode": "REMOTO",
+                            "url": "https://example.com/job-a",
+                            "status": "PENDIENTE",
+                            "source": "LinkedIn",
+                            "externalId": "job-a"
+                        }
+                        """));
+    }
 
     @Test
     void shouldReturnNotFoundWhenJobOfferDoesNotExist() throws Exception {
-    when(getJobOfferService.getById(1L))
-            .thenThrow(new JobOfferNotFoundException());
+        when(getJobOfferService.getById(1L))
+                .thenThrow(new JobOfferNotFoundException());
 
-    mockMvc.perform(get("/job-offers/1"))
-            .andExpect(status().isNotFound());
-}
+        mockMvc.perform(get("/job-offers/1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldGetAllJobOffersWithoutFilters() throws Exception {
+        JobOffer jobOffer = new JobOffer(
+                1L,
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "https://example.com/job-a",
+                null,
+                JobOfferStatus.PENDIENTE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "LinkedIn",
+                "job-a"
+        );
+
+        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
+                .thenReturn(List.of(jobOffer));
+
+        mockMvc.perform(get("/job-offers"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("""
+                        [
+                            {
+                                "id": 1,
+                                "company": "Empresa A",
+                                "title": "Backend Developer",
+                                "location": "Madrid",
+                                "workMode": "REMOTO",
+                                "url": "https://example.com/job-a",
+                                "status": "PENDIENTE",
+                                "source": "LinkedIn",
+                                "externalId": "job-a"
+                            }
+                        ]
+                        """));
+    }
+
+    @Test
+    void shouldFilterJobOffersByLocation() throws Exception {
+        JobOffer jobOffer = new JobOffer(
+                1L,
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "https://example.com/job-a",
+                null,
+                JobOfferStatus.PENDIENTE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "LinkedIn",
+                "job-a"
+        );
+
+        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
+                .thenReturn(List.of(jobOffer));
+
+        mockMvc.perform(get("/job-offers")
+                        .param("location", "Madrid"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("""
+                        [
+                            {
+                                "id": 1,
+                                "company": "Empresa A",
+                                "title": "Backend Developer",
+                                "location": "Madrid",
+                                "workMode": "REMOTO",
+                                "url": "https://example.com/job-a",
+                                "status": "PENDIENTE",
+                                "source": "LinkedIn",
+                                "externalId": "job-a"
+                            }
+                        ]
+                        """));
+    }
+
+    @Test
+    void shouldFilterJobOffersByLocationAndStatus() throws Exception {
+        JobOffer jobOffer = new JobOffer(
+                1L,
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "https://example.com/job-a",
+                null,
+                JobOfferStatus.SOLICITADA,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "LinkedIn",
+                "job-a"
+        );
+
+        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
+                .thenReturn(List.of(jobOffer));
+
+        mockMvc.perform(get("/job-offers")
+                        .param("location", "Madrid")
+                        .param("status", "SOLICITADA"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("""
+                        [
+                            {
+                                "id": 1,
+                                "company": "Empresa A",
+                                "title": "Backend Developer",
+                                "location": "Madrid",
+                                "workMode": "REMOTO",
+                                "url": "https://example.com/job-a",
+                                "status": "SOLICITADA",
+                                "source": "LinkedIn",
+                                "externalId": "job-a"
+                            }
+                        ]
+                        """));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoJobOffersMatch() throws Exception {
+        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/job-offers")
+                        .param("location", "Barcelona"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void shouldUpdateJobOfferStatus() throws Exception {
+        JobOffer updatedJobOffer = new JobOffer(
+                1L,
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "https://example.com/job-a",
+                null,
+                JobOfferStatus.SOLICITADA,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "LinkedIn",
+                "job-a"
+        );
+
+        when(updateJobOfferStatusService.updateStatus(1L, "SOLICITADA"))
+                .thenReturn(updatedJobOffer);
+
+        mockMvc.perform(patch("/job-offers/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "status": "SOLICITADA"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("""
+                        {
+                            "id": 1,
+                            "company": "Empresa A",
+                            "title": "Backend Developer",
+                            "location": "Madrid",
+                            "workMode": "REMOTO",
+                            "url": "https://example.com/job-a",
+                            "status": "SOLICITADA",
+                            "source": "LinkedIn",
+                            "externalId": "job-a"
+                        }
+                        """));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUpdatingStatusOfNonExistingJobOffer() throws Exception {
+        when(updateJobOfferStatusService.updateStatus(1L, "SOLICITADA"))
+                .thenThrow(new JobOfferNotFoundException());
+
+        mockMvc.perform(patch("/job-offers/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "status": "SOLICITADA"
+                                }
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenStatusIsInvalid() throws Exception {
+        when(updateJobOfferStatusService.updateStatus(1L, "INVALIDO"))
+                .thenThrow(new IllegalArgumentException());
+
+        mockMvc.perform(patch("/job-offers/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "status": "INVALIDO"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
 }

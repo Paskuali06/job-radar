@@ -78,4 +78,9 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
                 .map(mapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
 }
