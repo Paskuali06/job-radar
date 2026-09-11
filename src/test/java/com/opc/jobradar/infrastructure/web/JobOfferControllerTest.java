@@ -28,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @WebMvcTest(JobOfferController.class)
 class JobOfferControllerTest {
@@ -486,4 +488,103 @@ class JobOfferControllerTest {
             .andExpect(status().isConflict())
             .andExpect(content().string("Esta oferta ya existe"));
 }
+    @Test
+    void shouldReturnBadRequestWhenCompanyIsBlank() throws Exception {
+        mockMvc.perform(post("/job-offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "",
+                                    "title": "Java Developer",
+                                    "location": "Madrid",
+                                    "workMode": "Remoto",
+                                    "url": "https://example.com/job",
+                                    "source": "LINKEDIN",
+                                    "externalId": "123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(createJobOfferService, never()).create(any(JobOffer.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenTitleIsBlank() throws Exception {
+        mockMvc.perform(post("/job-offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "Company",
+                                    "title": "",
+                                    "location": "Madrid",
+                                    "workMode": "Remoto",
+                                    "url": "https://example.com/job",
+                                    "source": "LINKEDIN",
+                                    "externalId": "123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(createJobOfferService, never()).create(any(JobOffer.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUrlIsBlank() throws Exception {
+        mockMvc.perform(post("/job-offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "Company",
+                                    "title": "Java Developer",
+                                    "location": "Madrid",
+                                    "workMode": "Remoto",
+                                    "url": "",
+                                    "source": "LINKEDIN",
+                                    "externalId": "123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(createJobOfferService, never()).create(any(JobOffer.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenSourceIsBlank() throws Exception {
+        mockMvc.perform(post("/job-offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "Company",
+                                    "title": "Java Developer",
+                                    "location": "Madrid",
+                                    "workMode": "Remoto",
+                                    "url": "https://example.com/job",
+                                    "source": "",
+                                    "externalId": "123"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(createJobOfferService, never()).create(any(JobOffer.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenExternalIdIsBlank() throws Exception {
+        mockMvc.perform(post("/job-offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "Company",
+                                    "title": "Java Developer",
+                                    "location": "Madrid",
+                                    "workMode": "Remoto",
+                                    "url": "https://example.com/job",
+                                    "source": "LINKEDIN",
+                                    "externalId": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(createJobOfferService, never()).create(any(JobOffer.class));
+    }
 }
