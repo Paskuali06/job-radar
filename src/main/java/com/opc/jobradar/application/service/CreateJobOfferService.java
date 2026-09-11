@@ -3,8 +3,13 @@ package com.opc.jobradar.application.service;
 import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
+import com.opc.jobradar.domain.model.JobOfferStatusHistory;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
+import com.opc.jobradar.domain.port.out.JobOfferStatusHistoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
 
 /**
  * Caso de uso que crea ofertas de empleo después de validar los datos mínimos
@@ -14,28 +19,35 @@ import org.springframework.stereotype.Service;
 public class CreateJobOfferService {
 
     private final JobOfferRepository jobOfferRepository;
+    private final JobOfferStatusHistoryRepository jobOfferStatusHistoryRepository;
 
-    public CreateJobOfferService(JobOfferRepository jobOfferRepository) {
+    public CreateJobOfferService(
+            JobOfferRepository jobOfferRepository,
+            JobOfferStatusHistoryRepository jobOfferStatusHistoryRepository
+    ) {
         this.jobOfferRepository = jobOfferRepository;
+        this.jobOfferStatusHistoryRepository =
+                jobOfferStatusHistoryRepository;
     }
 
     /**
-     * Crea una nueva oferta de empleo.
+     * Crea una oferta de empleo y registra su estado inicial en el historial.
      *
-     * Antes de guardar la oferta se realizan las validaciones necesarias
-     * para garantizar que contiene una URL, una fuente y un identificador
-     * externo válidos, y que no existe otra oferta con la misma identidad.
-     *
-     * La identidad de una oferta está formada por la combinación
-     * de source y externalId.
-     *
-     * @param jobOffer oferta de empleo que se quiere crear
-     * @return oferta de empleo guardada
-     * @throws IllegalArgumentException si algún dato obligatorio no es válido
+     * @param jobOffer oferta que se desea crear
+     * @return oferta creada y persistida
+     * @throws IllegalArgumentException si la oferta o alguno de sus datos
+     *                                  obligatorios no es válido
      * @throws JobOfferAlreadyExistsException si ya existe una oferta con la
-     *                                         misma identidad
+     *                                        misma fuente e identificador externo
      */
+    @Transactional
     public JobOffer create(JobOffer jobOffer) {
+
+        if (jobOffer == null) {
+            throw new IllegalArgumentException(
+                    "Job offer cannot be null."
+            );
+        }
 
         if (jobOffer.getUrl() == null || jobOffer.getUrl().isBlank()) {
             throw new IllegalArgumentException(
@@ -49,16 +61,20 @@ public class CreateJobOfferService {
             );
         }
 
-        if (jobOffer.getExternalId() == null || jobOffer.getExternalId().isBlank()) {
+        if (jobOffer.getExternalId() == null
+                || jobOffer.getExternalId().isBlank()) {
             throw new IllegalArgumentException(
                     "Job offer external ID cannot be null or blank."
             );
         }
 
-        if (jobOfferRepository.existsBySourceAndExternalId(
-                jobOffer.getSource(),
-                jobOffer.getExternalId()
-        )) {
+        boolean alreadyExists =
+                jobOfferRepository.existsBySourceAndExternalId(
+                        jobOffer.getSource(),
+                        jobOffer.getExternalId()
+                );
+
+        if (alreadyExists) {
             throw new JobOfferAlreadyExistsException();
         }
 
@@ -66,6 +82,15 @@ public class CreateJobOfferService {
             jobOffer.setStatus(JobOfferStatus.PENDIENTE);
         }
 
-        return jobOfferRepository.save(jobOffer);
+        JobOffer savedJobOffer = jobOfferRepository.save(jobOffer);
+
+        JobOfferStatusHistory history = new JobOfferStatusHistory();
+        history.setJobOfferId(savedJobOffer.getId());
+        history.setStatus(savedJobOffer.getStatus());
+        history.setChangedAt(OffsetDateTime.now());
+
+        jobOfferStatusHistoryRepository.save(history);
+
+        return savedJobOffer;
     }
 }

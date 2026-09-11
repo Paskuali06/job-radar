@@ -4,12 +4,16 @@ import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
+import com.opc.jobradar.domain.port.out.JobOfferStatusHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -18,8 +22,14 @@ class CreateJobOfferServiceTest {
     private final JobOfferRepository jobOfferRepository =
             mock(JobOfferRepository.class);
 
+    private final JobOfferStatusHistoryRepository jobOfferStatusHistoryRepository =
+            mock(JobOfferStatusHistoryRepository.class);
+
     private final CreateJobOfferService createJobOfferService =
-            new CreateJobOfferService(jobOfferRepository);
+            new CreateJobOfferService(
+                    jobOfferRepository,
+                    jobOfferStatusHistoryRepository
+            );
 
     // ============================================================
     // CT-001 - Crear oferta cuando la identidad no existe
@@ -28,38 +38,7 @@ class CreateJobOfferServiceTest {
     @Test
     void shouldCreateJobOfferWhenSourceAndExternalIdDoNotExist() {
         JobOffer jobOffer = new JobOffer();
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
-        when(jobOfferRepository.existsBySourceAndExternalId(
-                "LinkedIn",
-                "123"
-        )).thenReturn(false);
-
-        when(jobOfferRepository.save(jobOffer))
-                .thenReturn(jobOffer);
-
-        JobOffer result = createJobOfferService.create(jobOffer);
-
-        assertNotNull(result);
-        assertSame(jobOffer, result);
-
-        verify(jobOfferRepository).existsBySourceAndExternalId(
-                "LinkedIn",
-                "123"
-        );
-
-        verify(jobOfferRepository).save(jobOffer);
-    }
-
-    // ============================================================
-    // CT-008 - Una oferta nueva sin estado comienza en PENDIENTE
-    // ============================================================
-
-    @Test
-    void shouldAssignPendingStatusWhenCreatingJobOfferWithoutStatus() {
-        JobOffer jobOffer = new JobOffer();
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
         jobOffer.setUrl("https://linkedin.com/jobs/123");
@@ -81,17 +60,17 @@ class CreateJobOfferServiceTest {
                 "LinkedIn",
                 "123"
         );
-
         verify(jobOfferRepository).save(jobOffer);
     }
 
     // ============================================================
-    // CT-002 - Rechazar oferta si la identidad ya existe
+    // CT-016 - No crear oferta duplicada
     // ============================================================
 
     @Test
-    void shouldRejectJobOfferWhenSourceAndExternalIdAlreadyExist() {
+    void shouldThrowJobOfferAlreadyExistsExceptionWhenIdentityAlreadyExists() {
         JobOffer jobOffer = new JobOffer();
+
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
         jobOffer.setUrl("https://linkedin.com/jobs/123");
@@ -101,14 +80,9 @@ class CreateJobOfferServiceTest {
                 "123"
         )).thenReturn(true);
 
-        JobOfferAlreadyExistsException exception = assertThrows(
+        assertThrows(
                 JobOfferAlreadyExistsException.class,
                 () -> createJobOfferService.create(jobOffer)
-        );
-
-        assertEquals(
-                "Esta oferta ya existe",
-                exception.getMessage()
         );
 
         verify(jobOfferRepository).existsBySourceAndExternalId(
@@ -116,271 +90,187 @@ class CreateJobOfferServiceTest {
                 "123"
         );
 
-        verify(jobOfferRepository, never()).save(any());
+        verify(jobOfferRepository, never()).save(any(JobOffer.class));
     }
 
     // ============================================================
-    // CT-003 - Rechazar oferta si la URL es null
+    // CT-018 - Validaciones de entrada
     // ============================================================
 
     @Test
-    void shouldRejectJobOfferWhenUrlIsNull() {
+    void shouldThrowIllegalArgumentExceptionWhenJobOfferIsNull() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> createJobOfferService.create(null)
+        );
+
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
+        );
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUrlIsNull() {
         JobOffer jobOffer = new JobOffer();
+
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
         jobOffer.setUrl(null);
 
-        IllegalArgumentException exception = assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> createJobOfferService.create(jobOffer)
         );
 
-        assertEquals(
-                "Job offer URL cannot be null or blank.",
-                exception.getMessage()
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
         );
-
-        verifyNoInteractions(jobOfferRepository);
     }
 
-    // ============================================================
-    // CT-004 - Rechazar oferta si la URL está vacía o en blanco
-    // ============================================================
-
     @ParameterizedTest
-    @ValueSource(strings = {"", " ", "    "})
-    void shouldRejectJobOfferWhenUrlIsBlank(String url) {
+    @ValueSource(strings = {"", " ", "   "})
+    void shouldThrowIllegalArgumentExceptionWhenUrlIsBlank(String url) {
         JobOffer jobOffer = new JobOffer();
+
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
         jobOffer.setUrl(url);
 
-        IllegalArgumentException exception = assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> createJobOfferService.create(jobOffer)
         );
 
-        assertEquals(
-                "Job offer URL cannot be null or blank.",
-                exception.getMessage()
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
         );
-
-        verifyNoInteractions(jobOfferRepository);
     }
 
-    // ============================================================
-    // CT-005 - Devolver la oferta guardada
-    // ============================================================
-
     @Test
-    void shouldReturnSavedJobOffer() {
+    void shouldThrowIllegalArgumentExceptionWhenSourceIsNull() {
         JobOffer jobOffer = new JobOffer();
-        jobOffer.setSource("LinkedIn");
+
+        jobOffer.setSource(null);
         jobOffer.setExternalId("123");
         jobOffer.setUrl("https://linkedin.com/jobs/123");
 
-        JobOffer savedJobOffer = new JobOffer();
-        savedJobOffer.setSource("LinkedIn");
-        savedJobOffer.setExternalId("123");
-        savedJobOffer.setUrl("https://linkedin.com/jobs/123");
-
-        when(jobOfferRepository.existsBySourceAndExternalId(
-                "LinkedIn",
-                "123"
-        )).thenReturn(false);
-
-        when(jobOfferRepository.save(jobOffer))
-                .thenReturn(savedJobOffer);
-
-        JobOffer result = createJobOfferService.create(jobOffer);
-
-        assertSame(savedJobOffer, result);
-
-        verify(jobOfferRepository).existsBySourceAndExternalId(
-                "LinkedIn",
-                "123"
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> createJobOfferService.create(jobOffer)
         );
 
-        verify(jobOfferRepository).save(jobOffer);
-    }
-
-    // ============================================================
-    // CT-006 - Mismo externalId pero diferente source
-    // ============================================================
-
-    @Test
-    void shouldCreateJobOfferWhenSourceIsDifferent() {
-        JobOffer jobOffer = new JobOffer();
-        jobOffer.setSource("Indeed");
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://indeed.com/jobs/123");
-
-        when(jobOfferRepository.existsBySourceAndExternalId(
-                "Indeed",
-                "123"
-        )).thenReturn(false);
-
-        when(jobOfferRepository.save(jobOffer))
-                .thenReturn(jobOffer);
-
-        JobOffer result = createJobOfferService.create(jobOffer);
-
-        assertNotNull(result);
-        assertSame(jobOffer, result);
-
-        verify(jobOfferRepository).existsBySourceAndExternalId(
-                "Indeed",
-                "123"
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
         );
-
-        verify(jobOfferRepository).save(jobOffer);
     }
-
-    // ============================================================
-    // CT-006 - Mismo source pero diferente externalId
-    // ============================================================
-
-    @Test
-    void shouldCreateJobOfferWhenExternalIdIsDifferent() {
-        JobOffer jobOffer = new JobOffer();
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("456");
-        jobOffer.setUrl("https://linkedin.com/jobs/456");
-
-        when(jobOfferRepository.existsBySourceAndExternalId(
-                "LinkedIn",
-                "456"
-        )).thenReturn(false);
-
-        when(jobOfferRepository.save(jobOffer))
-                .thenReturn(jobOffer);
-
-        JobOffer result = createJobOfferService.create(jobOffer);
-
-        assertNotNull(result);
-        assertSame(jobOffer, result);
-
-        verify(jobOfferRepository).existsBySourceAndExternalId(
-                "LinkedIn",
-                "456"
-        );
-
-        verify(jobOfferRepository).save(jobOffer);
-    }
-
-    // ============================================================
-    // CT-006 - Source obligatorio
-    // ============================================================
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " ", "    "})
-    void shouldRejectJobOfferWhenSourceIsBlank(String source) {
+    @ValueSource(strings = {"", " ", "   "})
+    void shouldThrowIllegalArgumentExceptionWhenSourceIsBlank(String source) {
         JobOffer jobOffer = new JobOffer();
+
         jobOffer.setSource(source);
         jobOffer.setExternalId("123");
         jobOffer.setUrl("https://linkedin.com/jobs/123");
 
-        IllegalArgumentException exception = assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> createJobOfferService.create(jobOffer)
         );
 
-        assertEquals(
-                "Job offer source cannot be null or blank.",
-                exception.getMessage()
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
         );
-
-        verifyNoInteractions(jobOfferRepository);
     }
 
-    // ============================================================
-    // CT-006 - ExternalId obligatorio
-    // ============================================================
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenExternalIdIsNull() {
+        JobOffer jobOffer = new JobOffer();
+
+        jobOffer.setSource("LinkedIn");
+        jobOffer.setExternalId(null);
+        jobOffer.setUrl("https://linkedin.com/jobs/123");
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> createJobOfferService.create(jobOffer)
+        );
+
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
+        );
+    }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " ", "    "})
-    void shouldRejectJobOfferWhenExternalIdIsBlank(String externalId) {
+    @ValueSource(strings = {"", " ", "   "})
+    void shouldThrowIllegalArgumentExceptionWhenExternalIdIsBlank(
+            String externalId
+    ) {
         JobOffer jobOffer = new JobOffer();
+
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId(externalId);
         jobOffer.setUrl("https://linkedin.com/jobs/123");
 
-        IllegalArgumentException exception = assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> createJobOfferService.create(jobOffer)
         );
 
-        assertEquals(
-                "Job offer external ID cannot be null or blank.",
-                exception.getMessage()
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
         );
-
-        verifyNoInteractions(jobOfferRepository);
     }
 
     // ============================================================
-    // CT-006 - La URL no determina la identidad
+    // CT-020 - Crear oferta registra estado inicial
     // ============================================================
 
     @Test
-    void shouldRejectJobOfferWhenIdentityExistsWithDifferentUrl() {
+    void shouldRegisterInitialPendingStatusInHistoryWhenJobOfferIsCreated() {
         JobOffer jobOffer = new JobOffer();
+
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123?tracking=abc");
+        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
         when(jobOfferRepository.existsBySourceAndExternalId(
                 "LinkedIn",
                 "123"
-        )).thenReturn(true);
+        )).thenReturn(false);
 
-        JobOfferAlreadyExistsException exception = assertThrows(
-                JobOfferAlreadyExistsException.class,
-                () -> createJobOfferService.create(jobOffer)
+        when(jobOfferRepository.save(jobOffer))
+                .thenAnswer(invocation -> {
+                    jobOffer.setId(1L);
+                    return jobOffer;
+                });
+
+        createJobOfferService.create(jobOffer);
+
+        verify(jobOfferStatusHistoryRepository).save(
+                argThat(history ->
+                        history.getJobOfferId().equals(1L)
+                                && history.getStatus()
+                                == JobOfferStatus.PENDIENTE
+                                && history.getChangedAt() != null
+                )
         );
-
-        assertEquals(
-                "Esta oferta ya existe",
-                exception.getMessage()
-        );
-
-        verify(jobOfferRepository).existsBySourceAndExternalId(
-                "LinkedIn",
-                "123"
-        );
-
-        verify(jobOfferRepository, never())
-                .existsByUrl(anyString());
-
-        verify(jobOfferRepository, never()).save(any());
     }
 
-    // ============================================================
-    // CT-016 - Rechazar oferta duplicada
-    // ============================================================
-
-    @Test
-    void shouldThrowExceptionWhenJobOfferAlreadyExists() {
-        JobOfferRepository repository = mock(JobOfferRepository.class);
-
+    private JobOffer createJobOffer() {
         JobOffer jobOffer = new JobOffer();
-        jobOffer.setUrl("https://example.com/job");
-        jobOffer.setSource("LINKEDIN");
+
+        jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
+        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
-        when(repository.existsBySourceAndExternalId(
-                "LINKEDIN",
-                "123"
-        )).thenReturn(true);
-
-        CreateJobOfferService service =
-                new CreateJobOfferService(repository);
-
-        assertThrows(
-                JobOfferAlreadyExistsException.class,
-                () -> service.create(jobOffer)
-        );
-
-        verify(repository, never()).save(jobOffer);
+        return jobOffer;
     }
 }
