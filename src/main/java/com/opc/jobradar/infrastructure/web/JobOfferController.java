@@ -200,7 +200,7 @@ public class JobOfferController {
     @PutMapping("/{id}")
     public ResponseEntity<JobOffer> update(
             @PathVariable Long id,
-            @RequestBody UpdateJobOfferRequest request) {
+            @Valid @RequestBody UpdateJobOfferRequest request) {
 
         JobOffer jobOffer = new JobOffer(
                 null,

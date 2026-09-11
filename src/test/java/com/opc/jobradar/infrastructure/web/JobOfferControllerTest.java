@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+
 @WebMvcTest(JobOfferController.class)
 class JobOfferControllerTest {
 
@@ -586,5 +587,61 @@ class JobOfferControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(createJobOfferService, never()).create(any(JobOffer.class));
+    }
+        @Test
+    void shouldReturnBadRequestWhenUpdatingJobOfferWithBlankCompany() throws Exception {
+        mockMvc.perform(put("/job-offers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "",
+                                    "title": "Nuevo título",
+                                    "location": "Barcelona",
+                                    "workMode": "REMOTO",
+                                    "url": "https://example.com/new-job"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(updateJobOfferService, never())
+                .update(any(Long.class), any(JobOffer.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdatingJobOfferWithBlankTitle() throws Exception {
+        mockMvc.perform(put("/job-offers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "Nueva Empresa",
+                                    "title": "",
+                                    "location": "Barcelona",
+                                    "workMode": "REMOTO",
+                                    "url": "https://example.com/new-job"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(updateJobOfferService, never())
+                .update(any(Long.class), any(JobOffer.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdatingJobOfferWithBlankUrl() throws Exception {
+        mockMvc.perform(put("/job-offers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "company": "Nueva Empresa",
+                                    "title": "Nuevo título",
+                                    "location": "Barcelona",
+                                    "workMode": "REMOTO",
+                                    "url": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verify(updateJobOfferService, never())
+                .update(any(Long.class), any(JobOffer.class));
     }
 }
