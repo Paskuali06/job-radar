@@ -31,6 +31,16 @@ public interface JobOfferRepository {
     Optional<JobOffer> findById(Long id);
 
     /**
+     * Busca una oferta por su identificador y su propietario.
+     *
+     * @param id identificador de la oferta
+     * @param userId identificador del usuario propietario
+     * @return la oferta encontrada, o un resultado vacío si no existe o no
+     *         pertenece al usuario
+     */
+    Optional<JobOffer> findByIdAndUserId(Long id, Long userId);
+
+    /**
      * Busca una oferta por su URL.
      *
      * @param url URL de la oferta
@@ -47,14 +57,19 @@ public interface JobOfferRepository {
     boolean existsByUrl(String url);
 
     /**
-     * Indica si existe una oferta con la identidad formada por fuente e
-     * identificador externo.
+     * Indica si existe una oferta para un usuario con la identidad formada por
+     * fuente e identificador externo.
      *
+     * @param userId identificador del usuario propietario
      * @param source fuente de la oferta
      * @param externalId identificador de la oferta en la fuente
-     * @return {@code true} si ya existe esa identidad
+     * @return {@code true} si ya existe esa identidad para el usuario
      */
-    boolean existsBySourceAndExternalId(String source, String externalId);
+    boolean existsByUserIdAndSourceAndExternalId(
+            Long userId,
+            String source,
+            String externalId
+    );
 
     /**
      * Consulta las ofertas de empleo aplicando los filtros proporcionados.

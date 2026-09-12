@@ -9,12 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class CreateJobOfferServiceTest {
@@ -37,13 +34,10 @@ class CreateJobOfferServiceTest {
 
     @Test
     void shouldCreateJobOfferWhenSourceAndExternalIdDoNotExist() {
-        JobOffer jobOffer = new JobOffer();
+        JobOffer jobOffer = createJobOffer();
 
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
-
-        when(jobOfferRepository.existsBySourceAndExternalId(
+        when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+                1L,
                 "LinkedIn",
                 "123"
         )).thenReturn(false);
@@ -56,10 +50,12 @@ class CreateJobOfferServiceTest {
         assertSame(jobOffer, result);
         assertEquals(JobOfferStatus.PENDIENTE, result.getStatus());
 
-        verify(jobOfferRepository).existsBySourceAndExternalId(
+        verify(jobOfferRepository).existsByUserIdAndSourceAndExternalId(
+                1L,
                 "LinkedIn",
                 "123"
         );
+
         verify(jobOfferRepository).save(jobOffer);
     }
 
@@ -69,13 +65,10 @@ class CreateJobOfferServiceTest {
 
     @Test
     void shouldThrowJobOfferAlreadyExistsExceptionWhenIdentityAlreadyExists() {
-        JobOffer jobOffer = new JobOffer();
+        JobOffer jobOffer = createJobOffer();
 
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
-
-        when(jobOfferRepository.existsBySourceAndExternalId(
+        when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+                1L,
                 "LinkedIn",
                 "123"
         )).thenReturn(true);
@@ -85,7 +78,8 @@ class CreateJobOfferServiceTest {
                 () -> createJobOfferService.create(jobOffer)
         );
 
-        verify(jobOfferRepository).existsBySourceAndExternalId(
+        verify(jobOfferRepository).existsByUserIdAndSourceAndExternalId(
+                1L,
                 "LinkedIn",
                 "123"
         );
@@ -111,11 +105,24 @@ class CreateJobOfferServiceTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionWhenUrlIsNull() {
-        JobOffer jobOffer = new JobOffer();
+    void shouldThrowIllegalArgumentExceptionWhenUserIdIsNull() {
+        JobOffer jobOffer = createJobOffer();
+        jobOffer.setUserId(null);
 
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("123");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> createJobOfferService.create(jobOffer)
+        );
+
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
+        );
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUrlIsNull() {
+        JobOffer jobOffer = createJobOffer();
         jobOffer.setUrl(null);
 
         assertThrows(
@@ -132,10 +139,7 @@ class CreateJobOfferServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "   "})
     void shouldThrowIllegalArgumentExceptionWhenUrlIsBlank(String url) {
-        JobOffer jobOffer = new JobOffer();
-
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("123");
+        JobOffer jobOffer = createJobOffer();
         jobOffer.setUrl(url);
 
         assertThrows(
@@ -151,11 +155,8 @@ class CreateJobOfferServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenSourceIsNull() {
-        JobOffer jobOffer = new JobOffer();
-
+        JobOffer jobOffer = createJobOffer();
         jobOffer.setSource(null);
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -171,11 +172,8 @@ class CreateJobOfferServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "   "})
     void shouldThrowIllegalArgumentExceptionWhenSourceIsBlank(String source) {
-        JobOffer jobOffer = new JobOffer();
-
+        JobOffer jobOffer = createJobOffer();
         jobOffer.setSource(source);
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -190,11 +188,8 @@ class CreateJobOfferServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenExternalIdIsNull() {
-        JobOffer jobOffer = new JobOffer();
-
-        jobOffer.setSource("LinkedIn");
+        JobOffer jobOffer = createJobOffer();
         jobOffer.setExternalId(null);
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -212,11 +207,8 @@ class CreateJobOfferServiceTest {
     void shouldThrowIllegalArgumentExceptionWhenExternalIdIsBlank(
             String externalId
     ) {
-        JobOffer jobOffer = new JobOffer();
-
-        jobOffer.setSource("LinkedIn");
+        JobOffer jobOffer = createJobOffer();
         jobOffer.setExternalId(externalId);
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -235,13 +227,10 @@ class CreateJobOfferServiceTest {
 
     @Test
     void shouldRegisterInitialPendingStatusInHistoryWhenJobOfferIsCreated() {
-        JobOffer jobOffer = new JobOffer();
+        JobOffer jobOffer = createJobOffer();
 
-        jobOffer.setSource("LinkedIn");
-        jobOffer.setExternalId("123");
-        jobOffer.setUrl("https://linkedin.com/jobs/123");
-
-        when(jobOfferRepository.existsBySourceAndExternalId(
+        when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+                1L,
                 "LinkedIn",
                 "123"
         )).thenReturn(false);
@@ -267,6 +256,7 @@ class CreateJobOfferServiceTest {
     private JobOffer createJobOffer() {
         JobOffer jobOffer = new JobOffer();
 
+        jobOffer.setUserId(1L);
         jobOffer.setSource("LinkedIn");
         jobOffer.setExternalId("123");
         jobOffer.setUrl("https://linkedin.com/jobs/123");

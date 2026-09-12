@@ -46,6 +46,12 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
     }
 
     @Override
+    public Optional<JobOffer> findByIdAndUserId(Long id, Long userId) {
+        return repository.findByIdAndUserId(id, userId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<JobOffer> findByUrl(String url) {
         return repository.findByUrl(url)
                 .map(mapper::toDomain);
@@ -57,11 +63,16 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
     }
 
     @Override
-    public boolean existsBySourceAndExternalId(
+    public boolean existsByUserIdAndSourceAndExternalId(
+            Long userId,
             String source,
             String externalId
     ) {
-        return repository.existsBySourceAndExternalId(source, externalId);
+        return repository.existsByUserIdAndSourceAndExternalId(
+                userId,
+                source,
+                externalId
+        );
     }
 
     @Override

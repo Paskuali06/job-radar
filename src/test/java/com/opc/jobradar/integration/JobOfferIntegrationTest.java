@@ -4,8 +4,12 @@ import com.opc.jobradar.application.service.CreateJobOfferService;
 import com.opc.jobradar.application.service.GetJobOfferService;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
+import com.opc.jobradar.domain.model.UserRole;
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
+import com.opc.jobradar.infrastructure.persistence.entity.UserEntity;
 import com.opc.jobradar.infrastructure.persistence.repository.JobOfferJpaRepository;
+import com.opc.jobradar.infrastructure.persistence.repository.UserJpaRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,34 +34,57 @@ class JobOfferIntegrationTest {
     @Autowired
     private JobOfferJpaRepository jobOfferJpaRepository;
 
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    private Long userId;
+
+    @BeforeEach
+    void setUp() {
+        UserEntity user = new UserEntity();
+        user.setName("Test User");
+        user.setEmail("test@example.com");
+        user.setPassword("password");
+        user.setRole(UserRole.USER);
+
+        UserEntity savedUser = userJpaRepository.saveAndFlush(user);
+        userId = savedUser.getId();
+    }
+
     @Test
     void shouldPersistAndRetrieveJobOffer() {
-        JobOffer jobOffer = createJobOffer();
+        JobOffer jobOffer = createJobOffer(userId);
 
         JobOffer savedJobOffer = createJobOfferService.create(jobOffer);
 
         JobOffer retrievedJobOffer =
-                getJobOfferService.getById(savedJobOffer.getId());
+                getJobOfferService.getById(savedJobOffer.getId(), userId);
 
         assertEquals(savedJobOffer.getId(), retrievedJobOffer.getId());
+        assertEquals(userId, retrievedJobOffer.getUserId());
         assertEquals("Empresa Integration", retrievedJobOffer.getCompany());
         assertEquals("Backend Developer", retrievedJobOffer.getTitle());
         assertEquals("Madrid", retrievedJobOffer.getLocation());
         assertEquals("REMOTO", retrievedJobOffer.getWorkMode());
-        assertEquals("https://example.com/integration-job", retrievedJobOffer.getUrl());
+        assertEquals(
+                "https://example.com/integration-job",
+                retrievedJobOffer.getUrl()
+        );
         assertEquals("LinkedIn", retrievedJobOffer.getSource());
         assertEquals("integration-001", retrievedJobOffer.getExternalId());
         assertEquals(JobOfferStatus.PENDIENTE, retrievedJobOffer.getStatus());
     }
 
     @Test
-    void shouldEnforceUniqueSourceAndExternalId() {
+    void shouldEnforceUniqueSourceAndExternalIdForSameUser() {
         JobOfferEntity firstOffer = createEntity(
+                userId,
                 "LinkedIn",
                 "integration-unique-001"
         );
 
         JobOfferEntity duplicateOffer = createEntity(
+                userId,
                 "LinkedIn",
                 "integration-unique-001"
         );
@@ -70,25 +97,27 @@ class JobOfferIntegrationTest {
         );
     }
 
-    private JobOffer createJobOffer() {
-    OffsetDateTime now = OffsetDateTime.now();
+    private JobOffer createJobOffer(Long userId) {
+        OffsetDateTime now = OffsetDateTime.now();
 
-    JobOffer jobOffer = new JobOffer();
+        JobOffer jobOffer = new JobOffer();
 
-    jobOffer.setCompany("Empresa Integration");
-    jobOffer.setTitle("Backend Developer");
-    jobOffer.setLocation("Madrid");
-    jobOffer.setWorkMode("REMOTO");
-    jobOffer.setUrl("https://example.com/integration-job");
-    jobOffer.setSource("LinkedIn");
-    jobOffer.setExternalId("integration-001");
-    jobOffer.setCreatedAt(now);
-    jobOffer.setUpdatedAt(now);
+        jobOffer.setUserId(userId);
+        jobOffer.setCompany("Empresa Integration");
+        jobOffer.setTitle("Backend Developer");
+        jobOffer.setLocation("Madrid");
+        jobOffer.setWorkMode("REMOTO");
+        jobOffer.setUrl("https://example.com/integration-job");
+        jobOffer.setSource("LinkedIn");
+        jobOffer.setExternalId("integration-001");
+        jobOffer.setCreatedAt(now);
+        jobOffer.setUpdatedAt(now);
 
-    return jobOffer;
+        return jobOffer;
     }
 
     private JobOfferEntity createEntity(
+            Long userId,
             String source,
             String externalId
     ) {
@@ -96,13 +125,12 @@ class JobOfferIntegrationTest {
 
         JobOfferEntity entity = new JobOfferEntity();
 
+        entity.setUserId(userId);
         entity.setCompany("Empresa Integration");
         entity.setTitle("Backend Developer");
         entity.setLocation("Madrid");
         entity.setWorkMode("REMOTO");
-        entity.setUrl(
-                "https://example.com/" + externalId
-        );
+        entity.setUrl("https://example.com/" + externalId);
         entity.setSource(source);
         entity.setExternalId(externalId);
         entity.setStatus("PENDIENTE");

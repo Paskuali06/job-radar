@@ -34,14 +34,28 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
     Optional<JobOfferEntity> findByUrl(String url);
 
     /**
-     * Comprueba la existencia de una entidad con la identidad de fuente e
-     * identificador externo indicada.
+     * Comprueba la existencia de una oferta para un usuario con la identidad
+     * de fuente e identificador externo indicada.
      *
+     * @param userId identificador del usuario propietario
      * @param source fuente de la oferta
      * @param externalId identificador de la oferta en la fuente
-     * @return {@code true} si existe esa identidad
+     * @return {@code true} si existe esa identidad para el usuario
      */
-    boolean existsBySourceAndExternalId(String source, String externalId);
+    boolean existsByUserIdAndSourceAndExternalId(
+            Long userId,
+            String source,
+            String externalId
+    );
+
+    /**
+     * Busca una oferta por su identificador y su propietario.
+     *
+     * @param id identificador de la oferta
+     * @param userId identificador del usuario propietario
+     * @return entidad encontrada, o un resultado vacío si no pertenece al usuario
+     */
+    Optional<JobOfferEntity> findByIdAndUserId(Long id, Long userId);
 
     /**
      * Busca ofertas aplicando únicamente los filtros que tengan valor.

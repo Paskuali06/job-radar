@@ -13,15 +13,15 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.infrastructure.web.UpdateJobOfferRequest;
 import com.opc.jobradar.infrastructure.web.UpdateJobOfferStatusRequest;
-
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +39,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/job-offers")
 public class JobOfferController {
+
+    private static final String USER_ID = "USER_ID";
 
     private final CreateJobOfferService createJobOfferService;
     private final GetJobOfferService getJobOfferService;
@@ -66,11 +68,13 @@ public class JobOfferController {
      * Crea una nueva oferta de empleo.
      *
      * @param request datos recibidos mediante HTTP
+     * @param session sesión HTTP del usuario autenticado
      * @return oferta creada con HTTP 201 Created
      */
     @PostMapping
     public ResponseEntity<JobOffer> create(
-            @Valid @RequestBody CreateJobOfferRequest request) {
+            @Valid @RequestBody CreateJobOfferRequest request,
+            HttpSession session) {
 
         JobOffer jobOffer = new JobOffer(
                 null,
@@ -90,6 +94,8 @@ public class JobOfferController {
                 request.externalId()
         );
 
+        jobOffer.setUserId(getUserId(session));
+
         JobOffer createdJobOffer = createJobOfferService.create(jobOffer);
 
         URI location = ServletUriComponentsBuilder
@@ -105,11 +111,19 @@ public class JobOfferController {
      * Obtiene una oferta de empleo por su identificador.
      *
      * @param id identificador interno de la oferta
+     * @param session sesión HTTP del usuario autenticado
      * @return oferta encontrada con HTTP 200 OK
      */
     @GetMapping("/{id}")
-    public ResponseEntity<JobOffer> getById(@PathVariable Long id) {
-        JobOffer jobOffer = getJobOfferService.getById(id);
+    public ResponseEntity<JobOffer> getById(
+            @PathVariable Long id,
+            HttpSession session) {
+
+        JobOffer jobOffer = getJobOfferService.getById(
+                id,
+                getUserId(session)
+        );
+
         return ResponseEntity.ok(jobOffer);
     }
 
@@ -223,7 +237,10 @@ public class JobOfferController {
                 null
         );
 
-        JobOffer updatedJobOffer = updateJobOfferService.update(id, jobOffer);
+        JobOffer updatedJobOffer = updateJobOfferService.update(
+                id,
+                jobOffer
+        );
 
         return ResponseEntity.ok(updatedJobOffer);
     }
@@ -241,5 +258,9 @@ public class JobOfferController {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(exception.getMessage());
+    }
+
+    private Long getUserId(HttpSession session) {
+        return (Long) session.getAttribute(USER_ID);
     }
 }

@@ -29,16 +29,19 @@ class GetJobOfferServiceTest {
     @Test
     void shouldReturnJobOfferWhenIdIsValidAndJobOfferExists() {
         Long id = 1L;
+        Long userId = 10L;
+
         JobOffer jobOffer = new JobOffer();
         jobOffer.setId(id);
+        jobOffer.setUserId(userId);
 
-        when(jobOfferRepository.findById(id))
+        when(jobOfferRepository.findByIdAndUserId(id, userId))
                 .thenReturn(Optional.of(jobOffer));
 
-        JobOffer result = getJobOfferService.getById(id);
+        JobOffer result = getJobOfferService.getById(id, userId);
 
         assertSame(jobOffer, result);
-        verify(jobOfferRepository).findById(id);
+        verify(jobOfferRepository).findByIdAndUserId(id, userId);
     }
 
     // ============================================================
@@ -48,16 +51,17 @@ class GetJobOfferServiceTest {
     @Test
     void shouldThrowJobOfferNotFoundExceptionWhenIdIsValidAndJobOfferDoesNotExist() {
         Long id = 1L;
+        Long userId = 10L;
 
-        when(jobOfferRepository.findById(id))
+        when(jobOfferRepository.findByIdAndUserId(id, userId))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 JobOfferNotFoundException.class,
-                () -> getJobOfferService.getById(id)
+                () -> getJobOfferService.getById(id, userId)
         );
 
-        verify(jobOfferRepository).findById(id);
+        verify(jobOfferRepository).findByIdAndUserId(id, userId);
     }
 
     // ============================================================
@@ -66,11 +70,71 @@ class GetJobOfferServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenIdIsNull() {
+        Long userId = 10L;
+
         assertThrows(
                 IllegalArgumentException.class,
-                () -> getJobOfferService.getById(null)
+                () -> getJobOfferService.getById(null, userId)
         );
 
         verifyNoInteractions(jobOfferRepository);
+    }
+
+    // ============================================================
+    // CT-028 - Rechazar usuario nulo sin consultar el repositorio
+    // ============================================================
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUserIdIsNull() {
+        Long id = 1L;
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> getJobOfferService.getById(id, null)
+        );
+
+        verifyNoInteractions(jobOfferRepository);
+    }
+
+    // ============================================================
+    // CT-028 - Devolver una oferta cuando pertenece al usuario
+    // ============================================================
+
+    @Test
+    void shouldReturnJobOfferWhenItBelongsToAuthenticatedUser() {
+        Long id = 1L;
+        Long userId = 10L;
+
+        JobOffer jobOffer = new JobOffer();
+        jobOffer.setId(id);
+        jobOffer.setUserId(userId);
+
+        when(jobOfferRepository.findByIdAndUserId(id, userId))
+                .thenReturn(Optional.of(jobOffer));
+
+        JobOffer result = getJobOfferService.getById(id, userId);
+
+        assertSame(jobOffer, result);
+        verify(jobOfferRepository).findByIdAndUserId(id, userId);
+    }
+
+    // ============================================================
+    // CT-028 - No devolver una oferta de otro usuario
+    // ============================================================
+
+    @Test
+    void shouldThrowJobOfferNotFoundExceptionWhenJobOfferBelongsToAnotherUser() {
+        Long id = 1L;
+        Long userId = 10L;
+
+        when(jobOfferRepository.findByIdAndUserId(id, userId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                JobOfferNotFoundException.class,
+                () -> getJobOfferService.getById(id, userId)
+        );
+
+        verify(jobOfferRepository).findByIdAndUserId(id, userId);
     }
 }

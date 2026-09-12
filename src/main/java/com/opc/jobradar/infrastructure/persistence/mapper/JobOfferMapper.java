@@ -26,7 +26,7 @@ public class JobOfferMapper {
             return null;
         }
 
-        return new JobOffer(
+        JobOffer jobOffer = new JobOffer(
                 entity.getId(),
                 entity.getCompany(),
                 entity.getTitle(),
@@ -45,6 +45,10 @@ public class JobOfferMapper {
                 entity.getSource(),
                 entity.getExternalId()
         );
+
+        jobOffer.setUserId(entity.getUserId());
+
+        return jobOffer;
     }
 
     /**
@@ -62,6 +66,7 @@ public class JobOfferMapper {
         JobOfferEntity entity = new JobOfferEntity();
 
         entity.setId(domain.getId());
+        entity.setUserId(domain.getUserId());
         entity.setCompany(domain.getCompany());
         entity.setTitle(domain.getTitle());
         entity.setLocation(domain.getLocation());
@@ -69,7 +74,9 @@ public class JobOfferMapper {
         entity.setUrl(domain.getUrl());
         entity.setPublishedAt(domain.getPublishedAt());
         entity.setStatus(
-                domain.getStatus() == null ? null : domain.getStatus().name()
+                domain.getStatus() == null
+                        ? null
+                        : domain.getStatus().name()
         );
         entity.setScore(domain.getScore());
         entity.setClassification(domain.getClassification());

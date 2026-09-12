@@ -20,6 +20,9 @@ public class JobOfferEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @Column(nullable = false, length = 150)
     private String company;
 
@@ -63,6 +66,10 @@ public class JobOfferEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 
     public String getCompany() {
@@ -123,6 +130,10 @@ public class JobOfferEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public void setCompany(String company) {

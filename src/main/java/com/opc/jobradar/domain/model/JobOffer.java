@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 public class JobOffer {
 
     private Long id;
+    private Long userId;
     private String company;
     private String title;
     private String location;
@@ -67,6 +68,10 @@ public class JobOffer {
         return id;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
     public String getCompany() {
         return company;
     }
@@ -115,7 +120,7 @@ public class JobOffer {
         return updatedAt;
     }
 
-      public String getSource() {
+    public String getSource() {
         return source;
     }
 
@@ -125,6 +130,10 @@ public class JobOffer {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public void setCompany(String company) {

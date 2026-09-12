@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Caso de uso que obtiene una oferta de empleo a partir de su identificador
- * interno.
+ * interno y su propietario.
  */
 @Service
 public class GetJobOfferService {
@@ -19,20 +19,26 @@ public class GetJobOfferService {
     }
 
     /**
-     * Obtiene una oferta por su identificador.
+     * Obtiene una oferta por su identificador y su propietario.
      *
      * @param id identificador interno de la oferta
+     * @param userId identificador del usuario propietario
      * @return la oferta encontrada
-     * @throws IllegalArgumentException si el identificador es {@code null}
+     * @throws IllegalArgumentException si el identificador de la oferta o del
+     *                                  usuario es {@code null}
      * @throws JobOfferNotFoundException si no existe una oferta con ese
-     *                                   identificador
+     *                                   identificador que pertenezca al usuario
      */
-    public JobOffer getById(Long id) {
+    public JobOffer getById(Long id, Long userId) {
         if (id == null) {
             throw new IllegalArgumentException("Job offer ID cannot be null.");
         }
 
-        return jobOfferRepository.findById(id)
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        return jobOfferRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(JobOfferNotFoundException::new);
     }
 }

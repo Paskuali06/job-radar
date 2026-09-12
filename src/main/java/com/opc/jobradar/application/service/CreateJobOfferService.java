@@ -39,6 +39,7 @@ public class CreateJobOfferService {
      *                                  obligatorios no es válido
      * @throws JobOfferAlreadyExistsException si ya existe una oferta con la
      *                                        misma fuente e identificador externo
+     *                                        para el mismo usuario
      */
     @Transactional
     public JobOffer create(JobOffer jobOffer) {
@@ -46,6 +47,12 @@ public class CreateJobOfferService {
         if (jobOffer == null) {
             throw new IllegalArgumentException(
                     "Job offer cannot be null."
+            );
+        }
+
+        if (jobOffer.getUserId() == null) {
+            throw new IllegalArgumentException(
+                    "User ID cannot be null."
             );
         }
 
@@ -69,7 +76,8 @@ public class CreateJobOfferService {
         }
 
         boolean alreadyExists =
-                jobOfferRepository.existsBySourceAndExternalId(
+                jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+                        jobOffer.getUserId(),
                         jobOffer.getSource(),
                         jobOffer.getExternalId()
                 );
