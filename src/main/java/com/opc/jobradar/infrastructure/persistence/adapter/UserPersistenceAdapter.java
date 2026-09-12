@@ -5,10 +5,12 @@ import com.opc.jobradar.domain.port.out.UserRepository;
 import com.opc.jobradar.infrastructure.persistence.entity.UserEntity;
 import com.opc.jobradar.infrastructure.persistence.mapper.UserMapper;
 import com.opc.jobradar.infrastructure.persistence.repository.UserJpaRepository;
+import org.springframework.stereotype.Component;
 
 /**
  * Persists users using JPA.
  */
+@Component
 public class UserPersistenceAdapter implements UserRepository {
 
     private final UserJpaRepository repository;

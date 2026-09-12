@@ -2,10 +2,12 @@ package com.opc.jobradar.infrastructure.persistence.mapper;
 
 import com.opc.jobradar.domain.model.User;
 import com.opc.jobradar.infrastructure.persistence.entity.UserEntity;
+import org.springframework.stereotype.Component;
 
 /**
  * Maps between User domain objects and UserEntity persistence objects.
  */
+@Component
 public class UserMapper {
 
     public UserEntity toEntity(User user) {

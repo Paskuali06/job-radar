@@ -1,12 +1,15 @@
 package com.opc.jobradar.application.service;
 
+import com.opc.jobradar.application.exception.InvalidCredentialsException;
 import com.opc.jobradar.domain.model.User;
 import com.opc.jobradar.domain.port.out.PasswordHasher;
 import com.opc.jobradar.domain.port.out.UserRepository;
+import org.springframework.stereotype.Service;
 
 /**
  * Authenticates Job-Radar users.
  */
+@Service
 public class LoginUserService {
 
     private final UserRepository userRepository;
@@ -19,16 +22,14 @@ public class LoginUserService {
         this.passwordHasher = passwordHasher;
     }
 
-    public boolean login(String email, String password) {
+    public User login(String email, String password) {
         User user = userRepository.findByEmail(email);
 
-        if (user == null) {
-            return false;
+        if (user == null ||
+                !passwordHasher.matches(password, user.getPassword())) {
+            throw new InvalidCredentialsException();
         }
 
-        return passwordHasher.matches(
-                password,
-                user.getPassword()
-        );
+        return user;
     }
 }

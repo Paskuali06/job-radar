@@ -1,4 +1,4 @@
-package com.opc.jobradar.infrastructure.web;
+package com.opc.jobradar.infrastructure.web.controller;
 
 import com.opc.jobradar.application.exception.JobOfferNotFoundException;
 import com.opc.jobradar.application.service.DeleteJobOfferService;
@@ -9,6 +9,8 @@ import com.opc.jobradar.application.service.UpdateJobOfferStatusService;
 import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
+import com.opc.jobradar.infrastructure.web.controller.CreateJobOfferRequest;
+import com.opc.jobradar.infrastructure.web.controller.JobOfferController;
 import com.opc.jobradar.application.service.UpdateJobOfferService;
 import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import org.junit.jupiter.api.Test;

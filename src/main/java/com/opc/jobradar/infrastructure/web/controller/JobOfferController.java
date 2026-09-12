@@ -1,4 +1,4 @@
-package com.opc.jobradar.infrastructure.web;
+package com.opc.jobradar.infrastructure.web.controller;
 
 import com.opc.jobradar.application.exception.JobOfferAlreadyExistsException;
 import com.opc.jobradar.application.exception.JobOfferNotFoundException;
@@ -11,6 +11,9 @@ import com.opc.jobradar.application.service.UpdateJobOfferStatusService;
 import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
+import com.opc.jobradar.infrastructure.web.UpdateJobOfferRequest;
+import com.opc.jobradar.infrastructure.web.UpdateJobOfferStatusRequest;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

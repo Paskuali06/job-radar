@@ -2,10 +2,12 @@ package com.opc.jobradar.infrastructure.security;
 
 import com.opc.jobradar.domain.port.out.PasswordHasher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
 /**
  * Hashes and verifies passwords using BCrypt.
  */
+@Component
 public class BCryptPasswordHasher implements PasswordHasher {
 
     private final BCryptPasswordEncoder passwordEncoder;
