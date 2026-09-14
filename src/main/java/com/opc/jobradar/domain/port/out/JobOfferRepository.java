@@ -72,12 +72,17 @@ public interface JobOfferRepository {
     );
 
     /**
-     * Consulta las ofertas de empleo aplicando los filtros proporcionados.
+     * Consulta las ofertas de empleo de un usuario aplicando los filtros
+     * proporcionados.
      *
+     * @param userId identificador del usuario propietario
      * @param filters filtros opcionales de consulta
-     * @return lista de ofertas que cumplen los filtros
+     * @return lista de ofertas del usuario que cumplen los filtros
      */
-    List<JobOffer> findAll(FiltersByJobOffer filters);
+    List<JobOffer> findAll(
+            Long userId,
+            FiltersByJobOffer filters
+    );
 
     /**
      * Elimina una oferta de empleo por su identificador interno.

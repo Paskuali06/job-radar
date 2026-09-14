@@ -20,12 +20,17 @@ public class GetJobOffersService {
     }
 
     /**
-     * Consulta las ofertas de empleo aplicando los filtros proporcionados.
+     * Consulta las ofertas de empleo de un usuario aplicando los filtros
+     * proporcionados.
      *
+     * @param userId identificador del usuario propietario
      * @param filters filtros opcionales de consulta
-     * @return lista de ofertas que cumplen los filtros
+     * @return lista de ofertas del usuario que cumplen los filtros
      */
-    public List<JobOffer> get(FiltersByJobOffer filters) {
+    public List<JobOffer> get(
+            Long userId,
+            FiltersByJobOffer filters
+    ) {
         FiltersByJobOffer normalizedFilters = new FiltersByJobOffer(
                 normalize(filters == null ? null : filters.getCompany()),
                 normalize(filters == null ? null : filters.getLocation()),
@@ -33,7 +38,10 @@ public class GetJobOffersService {
                 filters == null ? null : filters.getStatus()
         );
 
-        return jobOfferRepository.findAll(normalizedFilters);
+        return jobOfferRepository.findAll(
+                userId,
+                normalizedFilters
+        );
     }
 
     /**

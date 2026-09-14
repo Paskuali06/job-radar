@@ -8,41 +8,96 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class DeleteJobOfferServiceTest {
 
+    private static final Long JOB_OFFER_ID = 1L;
+    private static final Long USER_ID = 1L;
+    private static final Long OTHER_USER_ID = 2L;
+
+    private final JobOfferRepository jobOfferRepository =
+            org.mockito.Mockito.mock(JobOfferRepository.class);
+
+    private final DeleteJobOfferService deleteJobOfferService =
+            new DeleteJobOfferService(jobOfferRepository);
+
     @Test
-    void shouldDeleteJobOffer() {
-        JobOfferRepository repository = mock(JobOfferRepository.class);
+    void shouldDeleteJobOfferBelongingToUser() {
+        JobOffer jobOffer = new JobOffer();
+        jobOffer.setId(JOB_OFFER_ID);
+        jobOffer.setUserId(USER_ID);
 
-        when(repository.findById(1L))
-                .thenReturn(Optional.of(mock(JobOffer.class)));
+        when(jobOfferRepository.findByIdAndUserId(
+                JOB_OFFER_ID,
+                USER_ID
+        )).thenReturn(Optional.of(jobOffer));
 
-        DeleteJobOfferService service = new DeleteJobOfferService(repository);
+        deleteJobOfferService.delete(JOB_OFFER_ID, USER_ID);
 
-        service.delete(1L);
+        verify(jobOfferRepository).deleteById(JOB_OFFER_ID);
+    }
 
-        verify(repository).deleteById(1L);
+    @Test
+    void shouldThrowExceptionWhenJobOfferDoesNotBelongToUser() {
+        when(jobOfferRepository.findByIdAndUserId(
+                JOB_OFFER_ID,
+                OTHER_USER_ID
+        )).thenReturn(Optional.empty());
+
+        assertThrows(
+                JobOfferNotFoundException.class,
+                () -> deleteJobOfferService.delete(
+                        JOB_OFFER_ID,
+                        OTHER_USER_ID
+                )
+        );
+
+        verify(jobOfferRepository, never()).deleteById(JOB_OFFER_ID);
     }
 
     @Test
     void shouldThrowExceptionWhenJobOfferDoesNotExist() {
-        JobOfferRepository repository = mock(JobOfferRepository.class);
-
-        when(repository.findById(1L))
-                .thenReturn(Optional.empty());
-
-        DeleteJobOfferService service = new DeleteJobOfferService(repository);
+        when(jobOfferRepository.findByIdAndUserId(
+                JOB_OFFER_ID,
+                USER_ID
+        )).thenReturn(Optional.empty());
 
         assertThrows(
                 JobOfferNotFoundException.class,
-                () -> service.delete(1L)
+                () -> deleteJobOfferService.delete(
+                        JOB_OFFER_ID,
+                        USER_ID
+                )
         );
 
-        verify(repository, never()).deleteById(1L);
+        verify(jobOfferRepository, never()).deleteById(JOB_OFFER_ID);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIdIsNull() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> deleteJobOfferService.delete(null, USER_ID)
+        );
+
+        verify(jobOfferRepository, never())
+                .findByIdAndUserId(null, USER_ID);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserIdIsNull() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> deleteJobOfferService.delete(
+                        JOB_OFFER_ID,
+                        null
+                )
+        );
+
+        verify(jobOfferRepository, never())
+                .findByIdAndUserId(JOB_OFFER_ID, null);
     }
 }

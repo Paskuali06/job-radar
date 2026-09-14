@@ -76,8 +76,12 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
     }
 
     @Override
-    public List<JobOffer> findAll(FiltersByJobOffer filters) {
+    public List<JobOffer> findAll(
+            Long userId,
+            FiltersByJobOffer filters
+    ) {
         return repository.findAll(
+                        userId,
                         filters.getCompany(),
                         filters.getLocation(),
                         filters.getWorkMode(),

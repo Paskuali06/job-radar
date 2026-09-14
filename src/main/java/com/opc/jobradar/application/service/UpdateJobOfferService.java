@@ -18,20 +18,25 @@ public class UpdateJobOfferService {
     }
 
     /**
-     * Actualiza los datos permitidos de una oferta existente.
+     * Actualiza los datos permitidos de una oferta existente perteneciente al usuario.
      *
      * @param id identificador interno de la oferta
+     * @param userId identificador del usuario propietario
      * @param updatedJobOffer datos nuevos de la oferta
      * @return oferta actualizada y persistida
-     * @throws IllegalArgumentException si el identificador es {@code null}
-     * @throws JobOfferNotFoundException si no existe la oferta
+     * @throws IllegalArgumentException si el identificador o el usuario son {@code null}
+     * @throws JobOfferNotFoundException si la oferta no existe para el usuario
      */
-    public JobOffer update(Long id, JobOffer updatedJobOffer) {
+    public JobOffer update(Long id, Long userId, JobOffer updatedJobOffer) {
         if (id == null) {
             throw new IllegalArgumentException("Job offer ID cannot be null.");
         }
 
-        JobOffer existingJobOffer = jobOfferRepository.findById(id)
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+
+        JobOffer existingJobOffer = jobOfferRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(JobOfferNotFoundException::new);
 
         existingJobOffer.setCompany(updatedJobOffer.getCompany());

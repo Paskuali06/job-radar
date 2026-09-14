@@ -134,14 +134,16 @@ public class JobOfferController {
      * @param location ubicación
      * @param workMode modalidad de trabajo
      * @param status estado de la oferta
-     * @return ofertas que cumplen los filtros
+     * @param session sesión HTTP del usuario autenticado
+     * @return ofertas del usuario que cumplen los filtros
      */
     @GetMapping
     public ResponseEntity<List<JobOffer>> getAll(
             @RequestParam(required = false) String company,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String workMode,
-            @RequestParam(required = false) JobOfferStatus status) {
+            @RequestParam(required = false) JobOfferStatus status,
+            HttpSession session) {
 
         FiltersByJobOffer filters = new FiltersByJobOffer(
                 company,
@@ -150,7 +152,10 @@ public class JobOfferController {
                 status
         );
 
-        List<JobOffer> jobOffers = getJobOffersService.get(filters);
+        List<JobOffer> jobOffers = getJobOffersService.get(
+                getUserId(session),
+                filters
+        );
 
         return ResponseEntity.ok(jobOffers);
     }
@@ -160,15 +165,18 @@ public class JobOfferController {
      *
      * @param id identificador interno de la oferta
      * @param request datos recibidos mediante HTTP
+     * @param session sesión HTTP del usuario autenticado
      * @return oferta actualizada con HTTP 200 OK
      */
     @PatchMapping("/{id}/status")
     public ResponseEntity<JobOffer> updateStatus(
             @PathVariable Long id,
-            @RequestBody UpdateJobOfferStatusRequest request) {
+            @RequestBody UpdateJobOfferStatusRequest request,
+            HttpSession session) {
 
         JobOffer updatedJobOffer = updateJobOfferStatusService.updateStatus(
                 id,
+                getUserId(session),
                 request.status()
         );
 
@@ -199,25 +207,33 @@ public class JobOfferController {
      * Elimina una oferta de empleo.
      *
      * @param id identificador interno de la oferta
+     * @param session sesión HTTP del usuario autenticado
      * @return respuesta HTTP 204 No Content
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        deleteJobOfferService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
+        public void delete(
+        @PathVariable Long id,
+        HttpSession session) {
+
+    deleteJobOfferService.delete(
+            id,
+            getUserId(session)
+         );
+        }
 
     /**
      * Actualiza los datos de una oferta de empleo.
      *
      * @param id identificador interno de la oferta
      * @param request datos recibidos mediante HTTP
+     * @param session sesión HTTP del usuario autenticado
      * @return oferta actualizada con HTTP 200 OK
      */
     @PutMapping("/{id}")
     public ResponseEntity<JobOffer> update(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateJobOfferRequest request) {
+            @Valid @RequestBody UpdateJobOfferRequest request,
+            HttpSession session) {
 
         JobOffer jobOffer = new JobOffer(
                 null,
@@ -239,6 +255,7 @@ public class JobOfferController {
 
         JobOffer updatedJobOffer = updateJobOfferService.update(
                 id,
+                getUserId(session),
                 jobOffer
         );
 

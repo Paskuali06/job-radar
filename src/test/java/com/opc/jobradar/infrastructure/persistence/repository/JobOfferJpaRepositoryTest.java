@@ -67,6 +67,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(secondOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 null,
                 null,
@@ -88,8 +89,6 @@ class JobOfferJpaRepositoryTest {
                 "LinkedIn",
                 "job-a"
         );
-
-        offer.setUserId(userId);
 
         JobOfferEntity savedOffer = repository.save(offer);
 
@@ -122,6 +121,90 @@ class JobOfferJpaRepositoryTest {
                 repository.findByIdAndUserId(savedOffer.getId(), secondUserId);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnOnlyJobOffersBelongingToUser() {
+        JobOfferEntity firstUserOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-a"
+        );
+
+        JobOfferEntity secondUserOffer = createJobOffer(
+                "Empresa B",
+                "Java Developer",
+                "Barcelona",
+                "HIBRIDO",
+                "SOLICITADA",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-b"
+        );
+
+        secondUserOffer.setUserId(secondUserId);
+
+        repository.save(firstUserOffer);
+        repository.save(secondUserOffer);
+
+        List<JobOfferEntity> result = repository.findAll(
+                userId,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertEquals(1, result.size());
+        assertEquals(userId, result.get(0).getUserId());
+        assertEquals("Empresa A", result.get(0).getCompany());
+    }
+
+    @Test
+    void shouldApplyFiltersOnlyToUserJobOffers() {
+        JobOfferEntity userOffer = createJobOffer(
+                "Google",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-a"
+        );
+
+        JobOfferEntity otherUserOffer = createJobOffer(
+                "Google",
+                "Java Developer",
+                "Barcelona",
+                "HIBRIDO",
+                "SOLICITADA",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-b"
+        );
+
+        otherUserOffer.setUserId(secondUserId);
+
+        repository.save(userOffer);
+        repository.save(otherUserOffer);
+
+        List<JobOfferEntity> result = repository.findAll(
+                userId,
+                "Google",
+                null,
+                null,
+                null
+        );
+
+        assertEquals(1, result.size());
+        assertEquals(userId, result.get(0).getUserId());
+        assertEquals("Google", result.get(0).getCompany());
     }
 
     @Test
@@ -164,6 +247,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(thirdOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 "Madrid",
                 "REMOTO",
@@ -202,6 +286,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(secondOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 "Empresa A",
                 null,
                 null,
@@ -240,6 +325,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(secondOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 "Madrid",
                 null,
@@ -278,6 +364,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(secondOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 null,
                 "REMOTO",
@@ -316,6 +403,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(secondOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 null,
                 null,
@@ -366,6 +454,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(thirdOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 "Madrid",
                 "REMOTO",
@@ -416,6 +505,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(thirdOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 "Empresa A",
                 "Madrid",
                 "REMOTO",
@@ -445,6 +535,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(offer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 "Barcelona",
                 null,
@@ -482,6 +573,7 @@ class JobOfferJpaRepositoryTest {
         repository.save(madridCentroOffer);
 
         List<JobOfferEntity> result = repository.findAll(
+                userId,
                 null,
                 "Madrid",
                 null,

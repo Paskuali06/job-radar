@@ -22,6 +22,7 @@ class UpdateJobOfferServiceTest {
 
         JobOffer existingJobOffer = new JobOffer();
         existingJobOffer.setId(1L);
+        existingJobOffer.setUserId(1L);
         existingJobOffer.setCompany("Old Company");
         existingJobOffer.setTitle("Old Title");
         existingJobOffer.setLocation("Old Location");
@@ -35,34 +36,35 @@ class UpdateJobOfferServiceTest {
         updatedJobOffer.setWorkMode("Remoto");
         updatedJobOffer.setUrl("https://new-url.com");
 
-        when(repository.findById(1L))
+        when(repository.findByIdAndUserId(1L, 1L))
                 .thenReturn(Optional.of(existingJobOffer));
 
         UpdateJobOfferService service = new UpdateJobOfferService(repository);
 
-        service.update(1L, updatedJobOffer);
+        service.update(1L, 1L, updatedJobOffer);
 
         assertEquals("New Company", existingJobOffer.getCompany());
         assertEquals("New Title", existingJobOffer.getTitle());
         assertEquals("New Location", existingJobOffer.getLocation());
         assertEquals("Remoto", existingJobOffer.getWorkMode());
         assertEquals("https://new-url.com", existingJobOffer.getUrl());
+        assertEquals(1L, existingJobOffer.getUserId());
 
         verify(repository).save(existingJobOffer);
     }
 
     @Test
-    void shouldThrowExceptionWhenJobOfferDoesNotExist() {
+    void shouldThrowExceptionWhenJobOfferDoesNotBelongToUser() {
         JobOfferRepository repository = mock(JobOfferRepository.class);
 
-        when(repository.findById(1L))
+        when(repository.findByIdAndUserId(1L, 2L))
                 .thenReturn(Optional.empty());
 
         UpdateJobOfferService service = new UpdateJobOfferService(repository);
 
         assertThrows(
                 JobOfferNotFoundException.class,
-                () -> service.update(1L, new JobOffer())
+                () -> service.update(1L, 2L, new JobOffer())
         );
 
         verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
@@ -76,10 +78,25 @@ class UpdateJobOfferServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> service.update(null, new JobOffer())
+                () -> service.update(null, 1L, new JobOffer())
         );
 
-        verify(repository, never()).findById(null);
+        verify(repository, never()).findByIdAndUserId(null, 1L);
+        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserIdIsNull() {
+        JobOfferRepository repository = mock(JobOfferRepository.class);
+
+        UpdateJobOfferService service = new UpdateJobOfferService(repository);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.update(1L, null, new JobOffer())
+        );
+
+        verify(repository, never()).findByIdAndUserId(1L, null);
         verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 }

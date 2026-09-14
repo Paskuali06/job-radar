@@ -58,23 +58,27 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
     Optional<JobOfferEntity> findByIdAndUserId(Long id, Long userId);
 
     /**
-     * Busca ofertas aplicando únicamente los filtros que tengan valor.
+     * Busca las ofertas de un usuario aplicando únicamente los filtros que
+     * tengan valor.
      *
+     * @param userId identificador del usuario propietario
      * @param company empresa de la oferta
      * @param location ubicación de la oferta
      * @param workMode modalidad de trabajo
      * @param status estado de la oferta
-     * @return ofertas que cumplen todos los filtros proporcionados
+     * @return ofertas del usuario que cumplen todos los filtros proporcionados
      */
     @Query("""
             SELECT jobOffer
             FROM JobOfferEntity jobOffer
-            WHERE (:company IS NULL OR jobOffer.company = :company)
+            WHERE jobOffer.userId = :userId
+              AND (:company IS NULL OR jobOffer.company = :company)
               AND (:location IS NULL OR jobOffer.location = :location)
               AND (:workMode IS NULL OR jobOffer.workMode = :workMode)
               AND (:status IS NULL OR jobOffer.status = :status)
             """)
     List<JobOfferEntity> findAll(
+            @Param("userId") Long userId,
             @Param("company") String company,
             @Param("location") String location,
             @Param("workMode") String workMode,

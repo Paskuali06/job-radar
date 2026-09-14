@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,9 +33,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @WebMvcTest(JobOfferController.class)
 class JobOfferControllerTest {
+
+    private static final Long USER_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,7 +63,7 @@ class JobOfferControllerTest {
 
     private MockHttpSession authenticatedSession() {
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute("USER_ID", 1L);
+        session.setAttribute("USER_ID", USER_ID);
         return session;
     }
 
@@ -82,7 +87,7 @@ class JobOfferControllerTest {
                 "job-a"
         );
 
-        createdJobOffer.setUserId(1L);
+        createdJobOffer.setUserId(USER_ID);
 
         when(createJobOfferService.create(any(JobOffer.class)))
                 .thenReturn(createdJobOffer);
@@ -142,9 +147,9 @@ class JobOfferControllerTest {
                 "job-a"
         );
 
-        jobOffer.setUserId(1L);
+        jobOffer.setUserId(USER_ID);
 
-        when(getJobOfferService.getById(1L, 1L))
+        when(getJobOfferService.getById(1L, USER_ID))
                 .thenReturn(jobOffer);
 
         mockMvc.perform(get("/job-offers/1")
@@ -170,7 +175,7 @@ class JobOfferControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenJobOfferDoesNotExist() throws Exception {
-        when(getJobOfferService.getById(1L, 1L))
+        when(getJobOfferService.getById(1L, USER_ID))
                 .thenThrow(new JobOfferNotFoundException());
 
         mockMvc.perform(get("/job-offers/1")
@@ -198,8 +203,10 @@ class JobOfferControllerTest {
                 "job-a"
         );
 
-        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
-                .thenReturn(List.of(jobOffer));
+        when(getJobOffersService.get(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of(jobOffer));
 
         mockMvc.perform(get("/job-offers")
                         .session(authenticatedSession()))
@@ -244,8 +251,10 @@ class JobOfferControllerTest {
                 "job-a"
         );
 
-        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
-                .thenReturn(List.of(jobOffer));
+        when(getJobOffersService.get(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of(jobOffer));
 
         mockMvc.perform(get("/job-offers")
                         .session(authenticatedSession())
@@ -291,8 +300,10 @@ class JobOfferControllerTest {
                 "job-a"
         );
 
-        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
-                .thenReturn(List.of(jobOffer));
+        when(getJobOffersService.get(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of(jobOffer));
 
         mockMvc.perform(get("/job-offers")
                         .session(authenticatedSession())
@@ -321,8 +332,10 @@ class JobOfferControllerTest {
 
     @Test
     void shouldReturnEmptyListWhenNoJobOffersMatch() throws Exception {
-        when(getJobOffersService.get(any(FiltersByJobOffer.class)))
-                .thenReturn(List.of());
+        when(getJobOffersService.get(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of());
 
         mockMvc.perform(get("/job-offers")
                         .session(authenticatedSession())
@@ -356,6 +369,7 @@ class JobOfferControllerTest {
 
         when(updateJobOfferStatusService.updateStatus(
                 1L,
+                USER_ID,
                 "SOLICITADA"
         )).thenReturn(updatedJobOffer);
 
@@ -392,6 +406,7 @@ class JobOfferControllerTest {
 
         when(updateJobOfferStatusService.updateStatus(
                 1L,
+                USER_ID,
                 "SOLICITADA"
         )).thenThrow(new JobOfferNotFoundException());
 
@@ -410,6 +425,7 @@ class JobOfferControllerTest {
     void shouldReturnBadRequestWhenStatusIsInvalid() throws Exception {
         when(updateJobOfferStatusService.updateStatus(
                 1L,
+                USER_ID,
                 "INVALIDO"
         )).thenThrow(new IllegalArgumentException());
 
@@ -445,7 +461,8 @@ class JobOfferControllerTest {
         );
 
         when(updateJobOfferService.update(
-                org.mockito.ArgumentMatchers.eq(1L),
+                eq(1L),
+                eq(USER_ID),
                 any(JobOffer.class)
         )).thenReturn(updatedJobOffer);
 
@@ -480,6 +497,12 @@ class JobOfferControllerTest {
                             "externalId": "job-a"
                         }
                         """));
+
+        verify(updateJobOfferService).update(
+                eq(1L),
+                eq(USER_ID),
+                any(JobOffer.class)
+        );
     }
 
     @Test
@@ -487,7 +510,8 @@ class JobOfferControllerTest {
             throws Exception {
 
         when(updateJobOfferService.update(
-                org.mockito.ArgumentMatchers.eq(1L),
+                eq(1L),
+                eq(USER_ID),
                 any(JobOffer.class)
         )).thenThrow(new JobOfferNotFoundException());
 
@@ -667,7 +691,7 @@ class JobOfferControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(updateJobOfferService, never())
-                .update(any(Long.class), any(JobOffer.class));
+                .update(any(Long.class), eq(USER_ID), any(JobOffer.class));
     }
 
     @Test
@@ -689,7 +713,7 @@ class JobOfferControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(updateJobOfferService, never())
-                .update(any(Long.class), any(JobOffer.class));
+                .update(any(Long.class), eq(USER_ID), any(JobOffer.class));
     }
 
     @Test
@@ -711,6 +735,41 @@ class JobOfferControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(updateJobOfferService, never())
-                .update(any(Long.class), any(JobOffer.class));
+                .update(any(Long.class), eq(USER_ID), any(JobOffer.class));
     }
+    @Test
+void shouldDeleteJobOffer() throws Exception {
+    mockMvc.perform(delete("/job-offers/1")
+                    .session(authenticatedSession()))
+            .andExpect(status().isOk());
+
+    verify(deleteJobOfferService).delete(
+            1L,
+            USER_ID
+    );
+}
+
+        @Test
+        void shouldReturnNotFoundWhenDeletingNonExistingJobOffer()
+        throws Exception {
+
+        doThrow(new JobOfferNotFoundException())
+            .when(deleteJobOfferService)
+            .delete(1L, USER_ID);
+
+        mockMvc.perform(delete("/job-offers/1")
+                    .session(authenticatedSession()))
+            .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldRejectDeleteWithoutAuthenticatedUser()
+        throws Exception {
+
+        mockMvc.perform(delete("/job-offers/1"))
+            .andExpect(status().isUnauthorized());
+
+        verify(deleteJobOfferService, never())
+            .delete(any(Long.class), any(Long.class));
+}
 }

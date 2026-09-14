@@ -34,27 +34,39 @@ public class UpdateJobOfferStatusService {
     }
 
     /**
-     * Actualiza el estado de una oferta identificada por su ID y registra
-     * el nuevo estado en el historial.
+     * Actualiza el estado de una oferta identificada por su ID y usuario,
+     * y registra el nuevo estado en el historial.
      *
      * @param id identificador interno de la oferta
+     * @param userId identificador del usuario autenticado
      * @param status estado recibido desde la entrada externa
      * @return oferta con el estado actualizado y persistido
-     * @throws IllegalArgumentException si el ID es {@code null} o el estado
-     *                                  no pertenece a {@link JobOfferStatus}
-     * @throws JobOfferNotFoundException si no existe una oferta con ese ID
+     * @throws IllegalArgumentException si el ID o usuario son {@code null},
+     *                                  o el estado no es válido
+     * @throws JobOfferNotFoundException si la oferta no pertenece al usuario
      */
     @Transactional
-    public JobOffer updateStatus(Long id, String status) {
+    public JobOffer updateStatus(
+            Long id,
+            Long userId,
+            String status
+    ) {
         if (id == null) {
             throw new IllegalArgumentException(
                     "Job offer ID cannot be null."
             );
         }
 
+        if (userId == null) {
+            throw new IllegalArgumentException(
+                    "User ID cannot be null."
+            );
+        }
+
         JobOfferStatus newStatus = toJobOfferStatus(status);
 
-        JobOffer jobOffer = jobOfferRepository.findById(id)
+        JobOffer jobOffer = jobOfferRepository
+                .findByIdAndUserId(id, userId)
                 .orElseThrow(JobOfferNotFoundException::new);
 
         jobOffer.setStatus(newStatus);
