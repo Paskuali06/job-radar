@@ -13,6 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 class CreateJobOfferServiceTest {
 
@@ -310,4 +314,103 @@ class CreateJobOfferServiceTest {
 
         return jobOffer;
     }
+    // ============================================================
+    // CT-030 - Identidad por usuario
+    // ============================================================
+
+    @Test
+    void shouldAllowSameExternalIdWhenSourceIsDifferent() {
+    JobOffer jobOffer = createJobOffer();
+    jobOffer.setSource("Indeed");
+
+    when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+            1L,
+            "Indeed",
+            "123"
+    )).thenReturn(false);
+
+    when(jobOfferRepository.save(jobOffer))
+            .thenReturn(jobOffer);
+
+    JobOffer result = createJobOfferService.create(jobOffer);
+
+    assertSame(jobOffer, result);
+
+    verify(jobOfferRepository).existsByUserIdAndSourceAndExternalId(
+            1L,
+            "Indeed",
+            "123"
+    );
+
+    verify(jobOfferRepository).save(jobOffer);
+}
+
+    @Test
+    void shouldAllowSameSourceAndExternalIdForDifferentUser() {
+    JobOffer jobOffer = createJobOffer();
+    jobOffer.setUserId(2L);
+
+    when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+            2L,
+            "LinkedIn",
+            "123"
+    )).thenReturn(false);
+
+    when(jobOfferRepository.save(jobOffer))
+            .thenReturn(jobOffer);
+
+    JobOffer result = createJobOfferService.create(jobOffer);
+
+    assertSame(jobOffer, result);
+
+    verify(jobOfferRepository).existsByUserIdAndSourceAndExternalId(
+            2L,
+            "LinkedIn",
+            "123"
+    );
+
+    verify(jobOfferRepository).save(jobOffer);
+}
+// ============================================================
+// CT-031 - Fechas de creación y actualización
+// ============================================================
+
+    @Test
+void shouldSetCreatedAtAndUpdatedAtWhenJobOfferIsCreated() {
+    JobOffer jobOffer = createJobOffer();
+
+    when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+            1L,
+            "LinkedIn",
+            "123"
+    )).thenReturn(false);
+
+    when(jobOfferRepository.save(jobOffer))
+            .thenReturn(jobOffer);
+
+    JobOffer result = createJobOfferService.create(jobOffer);
+
+    assertNotNull(result.getCreatedAt());
+    assertNotNull(result.getUpdatedAt());
+}
+    @Test
+    void shouldPreservePublishedAtWhenJobOfferIsCreated() {
+    JobOffer jobOffer = createJobOffer();
+
+    OffsetDateTime publishedAt =
+            OffsetDateTime.of(2026, 9, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+
+    jobOffer.setPublishedAt(publishedAt);
+
+    when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+            1L, "LinkedIn", "123"
+    )).thenReturn(false);
+
+    when(jobOfferRepository.save(jobOffer))
+            .thenReturn(jobOffer);
+
+    JobOffer result = createJobOfferService.create(jobOffer);
+
+    assertEquals(publishedAt, result.getPublishedAt());
+} 
 }

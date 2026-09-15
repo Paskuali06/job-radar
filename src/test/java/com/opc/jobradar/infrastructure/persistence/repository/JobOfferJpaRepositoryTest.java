@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
@@ -649,9 +650,43 @@ class JobOfferJpaRepositoryTest {
         repository.save(firstOffer);
 
         assertThrows(
-                Exception.class,
+                DataIntegrityViolationException.class,
                 () -> repository.saveAndFlush(secondOffer)
         );
+    }
+
+    @Test
+    void shouldAllowSameExternalIdForDifferentSources() {
+        JobOfferEntity firstOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-123"
+        );
+
+        firstOffer.setUserId(userId);
+
+        JobOfferEntity secondOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-123"
+        );
+
+        secondOffer.setUserId(userId);
+
+        repository.save(firstOffer);
+        repository.save(secondOffer);
+
+        assertEquals(2, repository.count());
     }
 
     private UserEntity createUser(String email) {

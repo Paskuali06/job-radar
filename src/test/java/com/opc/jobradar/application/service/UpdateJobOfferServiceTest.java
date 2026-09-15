@@ -5,9 +5,12 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -20,6 +23,9 @@ class UpdateJobOfferServiceTest {
     void shouldUpdateJobOffer() {
         JobOfferRepository repository = mock(JobOfferRepository.class);
 
+        OffsetDateTime createdAt = OffsetDateTime.now().minusDays(2);
+        OffsetDateTime updatedAt = OffsetDateTime.now().minusDays(1);
+
         JobOffer existingJobOffer = new JobOffer();
         existingJobOffer.setId(1L);
         existingJobOffer.setUserId(1L);
@@ -28,6 +34,8 @@ class UpdateJobOfferServiceTest {
         existingJobOffer.setLocation("Old Location");
         existingJobOffer.setWorkMode("Presencial");
         existingJobOffer.setUrl("https://old-url.com");
+        existingJobOffer.setCreatedAt(createdAt);
+        existingJobOffer.setUpdatedAt(updatedAt);
 
         JobOffer updatedJobOffer = new JobOffer();
         updatedJobOffer.setCompany("New Company");
@@ -39,6 +47,9 @@ class UpdateJobOfferServiceTest {
         when(repository.findByIdAndUserId(1L, 1L))
                 .thenReturn(Optional.of(existingJobOffer));
 
+        when(repository.save(existingJobOffer))
+                .thenReturn(existingJobOffer);
+
         UpdateJobOfferService service = new UpdateJobOfferService(repository);
 
         service.update(1L, 1L, updatedJobOffer);
@@ -49,6 +60,76 @@ class UpdateJobOfferServiceTest {
         assertEquals("Remoto", existingJobOffer.getWorkMode());
         assertEquals("https://new-url.com", existingJobOffer.getUrl());
         assertEquals(1L, existingJobOffer.getUserId());
+
+        verify(repository).save(existingJobOffer);
+    }
+
+    @Test
+    void shouldUpdateUpdatedAtWithoutChangingCreatedAt() {
+        JobOfferRepository repository = mock(JobOfferRepository.class);
+
+        OffsetDateTime createdAt = OffsetDateTime.now().minusDays(2);
+        OffsetDateTime previousUpdatedAt = OffsetDateTime.now().minusDays(1);
+
+        JobOffer existingJobOffer = new JobOffer();
+        existingJobOffer.setId(1L);
+        existingJobOffer.setUserId(1L);
+        existingJobOffer.setCreatedAt(createdAt);
+        existingJobOffer.setUpdatedAt(previousUpdatedAt);
+
+        JobOffer updatedJobOffer = new JobOffer();
+        updatedJobOffer.setCompany("New Company");
+        updatedJobOffer.setTitle("New Title");
+        updatedJobOffer.setUrl("https://new-url.com");
+
+        when(repository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(existingJobOffer));
+
+        when(repository.save(existingJobOffer))
+                .thenReturn(existingJobOffer);
+
+        UpdateJobOfferService service = new UpdateJobOfferService(repository);
+
+        service.update(1L, 1L, updatedJobOffer);
+
+        assertEquals(createdAt, existingJobOffer.getCreatedAt());
+        assertNotNull(existingJobOffer.getUpdatedAt());
+        assertNotEquals(previousUpdatedAt, existingJobOffer.getUpdatedAt());
+
+        verify(repository).save(existingJobOffer);
+    }
+
+    @Test
+    void shouldUpdatePublishedAt() {
+        JobOfferRepository repository = mock(JobOfferRepository.class);
+
+        OffsetDateTime publishedAt =
+                OffsetDateTime.now().minusDays(5);
+
+        JobOffer existingJobOffer = new JobOffer();
+        existingJobOffer.setId(1L);
+        existingJobOffer.setUserId(1L);
+
+        JobOffer updatedJobOffer = new JobOffer();
+        updatedJobOffer.setCompany("New Company");
+        updatedJobOffer.setTitle("New Title");
+        updatedJobOffer.setUrl("https://new-url.com");
+        updatedJobOffer.setPublishedAt(publishedAt);
+
+        when(repository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(existingJobOffer));
+
+        when(repository.save(existingJobOffer))
+                .thenReturn(existingJobOffer);
+
+        UpdateJobOfferService service = new UpdateJobOfferService(repository);
+
+        service.update(1L, 1L, updatedJobOffer);
+
+        assertEquals(
+                publishedAt,
+                existingJobOffer.getPublishedAt()
+        );
 
         verify(repository).save(existingJobOffer);
     }

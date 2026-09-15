@@ -5,6 +5,8 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+
 /**
  * Caso de uso que actualiza los datos de una oferta de empleo existente.
  */
@@ -46,6 +48,7 @@ public class UpdateJobOfferService {
         existingJobOffer.setUrl(updatedJobOffer.getUrl());
         existingJobOffer.setPublishedAt(updatedJobOffer.getPublishedAt());
         existingJobOffer.setDescription(updatedJobOffer.getDescription());
+        existingJobOffer.setUpdatedAt(OffsetDateTime.now());
 
         return jobOfferRepository.save(existingJobOffer);
     }

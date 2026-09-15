@@ -98,6 +98,10 @@ public class CreateJobOfferService {
             jobOffer.setStatus(JobOfferStatus.PENDIENTE);
         }
 
+        OffsetDateTime now = OffsetDateTime.now();
+        jobOffer.setCreatedAt(now);
+        jobOffer.setUpdatedAt(now);
+
         JobOffer savedJobOffer = jobOfferRepository.save(jobOffer);
 
         JobOfferStatusHistory history = new JobOfferStatusHistory();
