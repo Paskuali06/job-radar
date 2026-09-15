@@ -50,11 +50,6 @@ public class JobOfferEntity {
     @Column(nullable = false, length = 30)
     private String status;
 
-    private Integer score;
-
-    @Column(length = 1)
-    private String classification;
-
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -106,14 +101,6 @@ public class JobOfferEntity {
 
     public String getStatus() {
         return status;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public String getClassification() {
-        return classification;
     }
 
     public String getDescription() {
@@ -170,14 +157,6 @@ public class JobOfferEntity {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
-
-    public void setClassification(String classification) {
-        this.classification = classification;
     }
 
     public void setDescription(String description) {

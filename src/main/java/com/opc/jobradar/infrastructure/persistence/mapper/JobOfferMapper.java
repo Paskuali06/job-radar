@@ -37,8 +37,6 @@ public class JobOfferMapper {
                 entity.getStatus() == null
                         ? null
                         : JobOfferStatus.valueOf(entity.getStatus()),
-                entity.getScore(),
-                entity.getClassification(),
                 entity.getDescription(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
@@ -78,8 +76,6 @@ public class JobOfferMapper {
                         ? null
                         : domain.getStatus().name()
         );
-        entity.setScore(domain.getScore());
-        entity.setClassification(domain.getClassification());
         entity.setDescription(domain.getDescription());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getUpdatedAt());

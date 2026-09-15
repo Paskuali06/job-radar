@@ -9,6 +9,8 @@ import com.opc.jobradar.domain.port.out.JobOfferStatusHistoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 
 /**
@@ -62,6 +64,12 @@ public class CreateJobOfferService {
             );
         }
 
+        if (!isValidUrl(jobOffer.getUrl())) {
+            throw new IllegalArgumentException(
+                    "Job offer URL is not valid."
+            );
+        }
+
         if (jobOffer.getSource() == null || jobOffer.getSource().isBlank()) {
             throw new IllegalArgumentException(
                     "Job offer source cannot be null or blank."
@@ -100,5 +108,19 @@ public class CreateJobOfferService {
         jobOfferStatusHistoryRepository.save(history);
 
         return savedJobOffer;
+    }
+
+    private boolean isValidUrl(String url) {
+        try {
+            URI uri = new URI(url);
+
+            return ("http".equalsIgnoreCase(uri.getScheme())
+                    || "https".equalsIgnoreCase(uri.getScheme()))
+                    && uri.getHost() != null
+                    && !uri.getHost().isBlank();
+
+        } catch (URISyntaxException exception) {
+            return false;
+        }
     }
 }

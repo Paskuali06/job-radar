@@ -19,8 +19,6 @@ public class JobOffer {
     private String url;
     private OffsetDateTime publishedAt;
     private JobOfferStatus status;
-    private Integer score;
-    private String classification;
     private String description;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
@@ -39,8 +37,6 @@ public class JobOffer {
             String url,
             OffsetDateTime publishedAt,
             JobOfferStatus status,
-            Integer score,
-            String classification,
             String description,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
@@ -55,8 +51,6 @@ public class JobOffer {
         this.url = url;
         this.publishedAt = publishedAt;
         this.status = status;
-        this.score = score;
-        this.classification = classification;
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -98,14 +92,6 @@ public class JobOffer {
 
     public JobOfferStatus getStatus() {
         return status;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public String getClassification() {
-        return classification;
     }
 
     public String getDescription() {
@@ -162,14 +148,6 @@ public class JobOffer {
 
     public void setStatus(JobOfferStatus status) {
         this.status = status;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
-
-    public void setClassification(String classification) {
-        this.classification = classification;
     }
 
     public void setDescription(String description) {

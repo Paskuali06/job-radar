@@ -77,8 +77,6 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
-                null,
-                null,
                 "LinkedIn",
                 "job-a"
         );
@@ -120,8 +118,6 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
-                null,
-                null,
                 "LinkedIn",
                 "job-a"
         );
@@ -135,8 +131,6 @@ class JobOfferPersistenceAdapterTest {
                 "https://example.com/job-b",
                 null,
                 JobOfferStatus.PENDIENTE,
-                null,
-                null,
                 null,
                 null,
                 null,

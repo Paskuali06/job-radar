@@ -23,10 +23,6 @@ public record UpdateJobOfferRequest(
 
         OffsetDateTime publishedAt,
 
-        Integer score,
-
-        String classification,
-
         String description
 ) {
 }

@@ -253,6 +253,53 @@ class CreateJobOfferServiceTest {
         );
     }
 
+    // ============================================================
+    // CT-029 - Integridad de JobOffer
+    // ============================================================
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUrlIsInvalid() {
+        JobOffer jobOffer = createJobOffer();
+        jobOffer.setUrl("esto-no-es-una-url");
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> createJobOfferService.create(jobOffer)
+        );
+
+        verifyNoInteractions(
+                jobOfferRepository,
+                jobOfferStatusHistoryRepository
+        );
+    }
+
+    @Test
+    void shouldCreateJobOfferWhenUrlIsValid() {
+        JobOffer jobOffer = createJobOffer();
+        jobOffer.setUrl("https://www.linkedin.com/jobs/view/123");
+
+        when(jobOfferRepository.existsByUserIdAndSourceAndExternalId(
+                1L,
+                "LinkedIn",
+                "123"
+        )).thenReturn(false);
+
+        when(jobOfferRepository.save(jobOffer))
+                .thenReturn(jobOffer);
+
+        JobOffer result = createJobOfferService.create(jobOffer);
+
+        assertSame(jobOffer, result);
+
+        verify(jobOfferRepository).existsByUserIdAndSourceAndExternalId(
+                1L,
+                "LinkedIn",
+                "123"
+        );
+
+        verify(jobOfferRepository).save(jobOffer);
+    }
+
     private JobOffer createJobOffer() {
         JobOffer jobOffer = new JobOffer();
 

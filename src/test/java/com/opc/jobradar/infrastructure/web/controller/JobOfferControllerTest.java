@@ -27,13 +27,13 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @WebMvcTest(JobOfferController.class)
 class JobOfferControllerTest {
@@ -78,8 +78,6 @@ class JobOfferControllerTest {
                 "https://example.com/job-a",
                 null,
                 JobOfferStatus.PENDIENTE,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -141,8 +139,6 @@ class JobOfferControllerTest {
                 null,
                 null,
                 null,
-                null,
-                null,
                 "LinkedIn",
                 "job-a"
         );
@@ -197,8 +193,6 @@ class JobOfferControllerTest {
                 null,
                 null,
                 null,
-                null,
-                null,
                 "LinkedIn",
                 "job-a"
         );
@@ -242,8 +236,6 @@ class JobOfferControllerTest {
                 "https://example.com/job-a",
                 null,
                 JobOfferStatus.PENDIENTE,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -291,8 +283,6 @@ class JobOfferControllerTest {
                 "https://example.com/job-a",
                 null,
                 JobOfferStatus.SOLICITADA,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -358,8 +348,6 @@ class JobOfferControllerTest {
                 "https://example.com/job-a",
                 null,
                 JobOfferStatus.SOLICITADA,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -451,8 +439,6 @@ class JobOfferControllerTest {
                 "https://example.com/new-job",
                 null,
                 JobOfferStatus.PENDIENTE,
-                null,
-                null,
                 null,
                 null,
                 null,
@@ -737,39 +723,40 @@ class JobOfferControllerTest {
         verify(updateJobOfferService, never())
                 .update(any(Long.class), eq(USER_ID), any(JobOffer.class));
     }
+
     @Test
-void shouldDeleteJobOffer() throws Exception {
-    mockMvc.perform(delete("/job-offers/1")
-                    .session(authenticatedSession()))
-            .andExpect(status().isOk());
+    void shouldDeleteJobOffer() throws Exception {
+        mockMvc.perform(delete("/job-offers/1")
+                        .session(authenticatedSession()))
+                .andExpect(status().isOk());
 
-    verify(deleteJobOfferService).delete(
-            1L,
-            USER_ID
-    );
-}
+        verify(deleteJobOfferService).delete(
+                1L,
+                USER_ID
+        );
+    }
 
-        @Test
-        void shouldReturnNotFoundWhenDeletingNonExistingJobOffer()
-        throws Exception {
+    @Test
+    void shouldReturnNotFoundWhenDeletingNonExistingJobOffer()
+            throws Exception {
 
         doThrow(new JobOfferNotFoundException())
-            .when(deleteJobOfferService)
-            .delete(1L, USER_ID);
+                .when(deleteJobOfferService)
+                .delete(1L, USER_ID);
 
         mockMvc.perform(delete("/job-offers/1")
-                    .session(authenticatedSession()))
-            .andExpect(status().isNotFound());
-        }
+                        .session(authenticatedSession()))
+                .andExpect(status().isNotFound());
+    }
 
-        @Test
-        void shouldRejectDeleteWithoutAuthenticatedUser()
-        throws Exception {
+    @Test
+    void shouldRejectDeleteWithoutAuthenticatedUser()
+            throws Exception {
 
         mockMvc.perform(delete("/job-offers/1"))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
 
         verify(deleteJobOfferService, never())
-            .delete(any(Long.class), any(Long.class));
-}
+                .delete(any(Long.class), any(Long.class));
+    }
 }

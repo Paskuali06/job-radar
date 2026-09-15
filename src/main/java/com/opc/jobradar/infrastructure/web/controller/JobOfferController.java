@@ -88,8 +88,6 @@ public class JobOfferController {
                 null,
                 null,
                 null,
-                null,
-                null,
                 request.source(),
                 request.externalId()
         );
@@ -211,15 +209,15 @@ public class JobOfferController {
      * @return respuesta HTTP 204 No Content
      */
     @DeleteMapping("/{id}")
-        public void delete(
-        @PathVariable Long id,
-        HttpSession session) {
+    public void delete(
+            @PathVariable Long id,
+            HttpSession session) {
 
-    deleteJobOfferService.delete(
-            id,
-            getUserId(session)
-         );
-        }
+        deleteJobOfferService.delete(
+                id,
+                getUserId(session)
+        );
+    }
 
     /**
      * Actualiza los datos de una oferta de empleo.
@@ -244,8 +242,6 @@ public class JobOfferController {
                 request.url(),
                 request.publishedAt(),
                 null,
-                request.score(),
-                request.classification(),
                 request.description(),
                 null,
                 null,

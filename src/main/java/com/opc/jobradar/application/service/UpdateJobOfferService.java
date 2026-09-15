@@ -45,8 +45,6 @@ public class UpdateJobOfferService {
         existingJobOffer.setWorkMode(updatedJobOffer.getWorkMode());
         existingJobOffer.setUrl(updatedJobOffer.getUrl());
         existingJobOffer.setPublishedAt(updatedJobOffer.getPublishedAt());
-        existingJobOffer.setScore(updatedJobOffer.getScore());
-        existingJobOffer.setClassification(updatedJobOffer.getClassification());
         existingJobOffer.setDescription(updatedJobOffer.getDescription());
 
         return jobOfferRepository.save(existingJobOffer);
