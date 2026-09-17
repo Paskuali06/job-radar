@@ -7,8 +7,13 @@ import com.opc.jobradar.domain.model.UserRole;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class LoginControllerTest {
 
@@ -48,10 +53,20 @@ class LoginControllerTest {
                 () -> controller.login(
                         "jaime@test.com",
                         "wrong",
-                        session)
+                        session
+                )
         );
 
         verify(session, never())
                 .setAttribute(anyString(), any());
     }
-} 
+
+    @Test
+    void shouldInvalidateSessionWhenLogout() {
+        HttpSession session = mock(HttpSession.class);
+
+        controller.logout(session);
+
+        verify(session).invalidate();
+    }
+}

@@ -4,10 +4,13 @@ import com.opc.jobradar.domain.model.User;
 import com.opc.jobradar.domain.model.UserRole;
 import com.opc.jobradar.domain.port.out.PasswordHasher;
 import com.opc.jobradar.domain.port.out.UserRepository;
+import org.springframework.stereotype.Service;
 
 /**
  * Registers new Job-Radar users.
  */
+
+@Service
 public class RegisterUserService {
 
     private final UserRepository userRepository;

@@ -32,4 +32,8 @@ public class LoginController {
 
         session.setAttribute(USER_ID, user.getId());
     }
+    @PostMapping("/logout")
+    public void logout(HttpSession session) {
+        session.invalidate();
+    }
 }

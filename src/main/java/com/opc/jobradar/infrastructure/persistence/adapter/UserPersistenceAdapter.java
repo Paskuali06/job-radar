@@ -39,4 +39,12 @@ public class UserPersistenceAdapter implements UserRepository {
         UserEntity entity = repository.findByEmail(email);
         return mapper.toDomain(entity);
     }
+
+    @Override
+    public User findById(Long id) {
+        UserEntity entity = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return mapper.toDomain(entity);
+    }
 }

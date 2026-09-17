@@ -9,7 +9,9 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,12 +50,28 @@ class AuthenticationIntegrationTest {
         when(loginUserService.login("test@example.com", "password"))
                 .thenReturn(user);
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(
+                post("/auth/login")
                         .param("email", "test@example.com")
-                        .param("password", "password"))
-                .andExpect(status().isOk());
+                        .param("password", "password")
+        ).andExpect(status().isOk());
 
         verify(loginUserService).login("test@example.com", "password");
+    }
+
+    @Test
+    void shouldRejectProtectedEndpointAfterLogout() throws Exception {
+        MockHttpSession session = sessionWithUser();
+
+        mockMvc.perform(
+                post("/auth/logout")
+                        .session(session)
+        ).andExpect(status().isOk());
+
+        mockMvc.perform(
+                get("/job-offers")
+                        .session(session)
+        ).andExpect(status().isUnauthorized());
     }
 
     private MockHttpSession sessionWithUser() {
@@ -61,4 +79,27 @@ class AuthenticationIntegrationTest {
         session.setAttribute("USER_ID", 1L);
         return session;
     }
+    @Test
+void shouldRejectAccessToAnotherUsersJobOffer() throws Exception {
+    mockMvc.perform(
+            get("/job-offers/999")
+                    .session(sessionWithUser())
+    ).andExpect(status().isNotFound());
+}
+
+@Test
+void shouldRejectUpdateOfAnotherUsersJobOffer() throws Exception {
+    mockMvc.perform(
+            put("/job-offers/999")
+                    .session(sessionWithUser())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {
+                                "company": "Other Company",
+                                "title": "Other Job",
+                                "url": "https://example.com/job"
+                            }
+                            """)
+    ).andExpect(status().isNotFound());
+}
 }
