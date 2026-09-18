@@ -38,6 +38,18 @@ public class GetJobOffersService {
                 filters == null ? null : filters.getStatus()
         );
 
+        normalizedFilters.setSearch(
+                normalize(filters == null ? null : filters.getSearch())
+        );
+
+        normalizedFilters.setSortBy(
+                filters == null ? null : filters.getSortBy()
+        );
+
+        normalizedFilters.setSortDirection(
+                filters == null ? null : filters.getSortDirection()
+        );
+
         return jobOfferRepository.findAll(
                 userId,
                 normalizedFilters

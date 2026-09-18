@@ -17,71 +17,86 @@ import java.util.Optional;
  */
 public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Long> {
 
-    /**
-     * Comprueba la existencia de una entidad con la URL indicada.
-     *
-     * @param url URL que se quiere comprobar
-     * @return {@code true} si existe una entidad con esa URL
-     */
     boolean existsByUrl(String url);
 
-    /**
-     * Busca una entidad por su URL.
-     *
-     * @param url URL de la oferta
-     * @return entidad encontrada, o un resultado vacío si no existe
-     */
     Optional<JobOfferEntity> findByUrl(String url);
 
-    /**
-     * Comprueba la existencia de una oferta para un usuario con la identidad
-     * de fuente e identificador externo indicada.
-     *
-     * @param userId identificador del usuario propietario
-     * @param source fuente de la oferta
-     * @param externalId identificador de la oferta en la fuente
-     * @return {@code true} si existe esa identidad para el usuario
-     */
     boolean existsByUserIdAndSourceAndExternalId(
             Long userId,
             String source,
             String externalId
     );
 
-    /**
-     * Busca una oferta por su identificador y su propietario.
-     *
-     * @param id identificador de la oferta
-     * @param userId identificador del usuario propietario
-     * @return entidad encontrada, o un resultado vacío si no pertenece al usuario
-     */
     Optional<JobOfferEntity> findByIdAndUserId(Long id, Long userId);
 
     /**
-     * Busca las ofertas de un usuario aplicando únicamente los filtros que
-     * tengan valor.
+     * Busca las ofertas de un usuario aplicando los filtros proporcionados
+     * y la ordenación solicitada.
      *
      * @param userId identificador del usuario propietario
      * @param company empresa de la oferta
      * @param location ubicación de la oferta
      * @param workMode modalidad de trabajo
      * @param status estado de la oferta
-     * @return ofertas del usuario que cumplen todos los filtros proporcionados
+     * @param search texto de búsqueda sobre empresa, título o descripción
+     * @param sortBy campo por el que ordenar
+     * @param sortDirection dirección de ordenación
+     * @return ofertas del usuario que cumplen los filtros proporcionados
      */
     @Query("""
-            SELECT jobOffer
-            FROM JobOfferEntity jobOffer
-            WHERE jobOffer.userId = :userId
-              AND (:company IS NULL OR jobOffer.company = :company)
-              AND (:location IS NULL OR jobOffer.location = :location)
-              AND (:workMode IS NULL OR jobOffer.workMode = :workMode)
-              AND (:status IS NULL OR jobOffer.status = :status)
-            """)
+        SELECT jobOffer
+        FROM JobOfferEntity jobOffer
+        WHERE jobOffer.userId = :userId
+          AND (:company IS NULL OR jobOffer.company = :company)
+          AND (:location IS NULL OR jobOffer.location = :location)
+          AND (:workMode IS NULL OR jobOffer.workMode = :workMode)
+          AND (:status IS NULL OR jobOffer.status = :status)
+          AND (
+                COALESCE(:search, '') = ''
+                OR LOWER(jobOffer.company) LIKE CONCAT('%', LOWER(COALESCE(:search, '')), '%')
+                OR LOWER(jobOffer.title) LIKE CONCAT('%', LOWER(COALESCE(:search, '')), '%')
+                OR LOWER(jobOffer.description) LIKE CONCAT('%', LOWER(COALESCE(:search, '')), '%')
+          )
+        ORDER BY
+            CASE
+                WHEN :sortBy = 'createdAt'
+                     AND :sortDirection = 'asc'
+                THEN jobOffer.createdAt
+            END ASC,
+            CASE
+                WHEN :sortBy = 'createdAt'
+                     AND :sortDirection = 'desc'
+                THEN jobOffer.createdAt
+            END DESC,
+            CASE
+                WHEN :sortBy = 'updatedAt'
+                     AND :sortDirection = 'asc'
+                THEN jobOffer.updatedAt
+            END ASC,
+            CASE
+                WHEN :sortBy = 'updatedAt'
+                     AND :sortDirection = 'desc'
+                THEN jobOffer.updatedAt
+            END DESC,
+            CASE
+                WHEN :sortBy = 'publishedAt'
+                     AND :sortDirection = 'asc'
+                THEN jobOffer.publishedAt
+            END ASC,
+            CASE
+                WHEN :sortBy = 'publishedAt'
+                     AND :sortDirection = 'desc'
+                THEN jobOffer.publishedAt
+            END DESC
+        """)
     List<JobOfferEntity> findAll(
             @Param("userId") Long userId,
             @Param("company") String company,
             @Param("location") String location,
             @Param("workMode") String workMode,
-            @Param("status") String status
+            @Param("status") String status,
+            @Param("search") String search,
+            @Param("sortBy") String sortBy,
+            @Param("sortDirection") String sortDirection
     );
 }

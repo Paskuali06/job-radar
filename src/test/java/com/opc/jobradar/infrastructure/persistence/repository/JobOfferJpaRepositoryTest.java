@@ -72,6 +72,9 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
                 null
         );
 
@@ -158,6 +161,9 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
                 null
         );
 
@@ -198,6 +204,9 @@ class JobOfferJpaRepositoryTest {
         List<JobOfferEntity> result = repository.findAll(
                 userId,
                 "Google",
+                null,
+                null,
+                null,
                 null,
                 null,
                 null
@@ -252,6 +261,9 @@ class JobOfferJpaRepositoryTest {
                 null,
                 "Madrid",
                 "REMOTO",
+                null,
+                null,
+                null,
                 null
         );
 
@@ -289,6 +301,9 @@ class JobOfferJpaRepositoryTest {
         List<JobOfferEntity> result = repository.findAll(
                 userId,
                 "Empresa A",
+                null,
+                null,
+                null,
                 null,
                 null,
                 null
@@ -330,6 +345,9 @@ class JobOfferJpaRepositoryTest {
                 null,
                 "Madrid",
                 null,
+                null,
+                null,
+                null,
                 null
         );
 
@@ -369,6 +387,9 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 "REMOTO",
+                null,
+                null,
+                null,
                 null
         );
 
@@ -408,7 +429,10 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                "SOLICITADA"
+                "SOLICITADA",
+                null,
+                null,
+                null
         );
 
         assertEquals(1, result.size());
@@ -459,7 +483,10 @@ class JobOfferJpaRepositoryTest {
                 null,
                 "Madrid",
                 "REMOTO",
-                "SOLICITADA"
+                "SOLICITADA",
+                null,
+                null,
+                null
         );
 
         assertEquals(1, result.size());
@@ -510,7 +537,10 @@ class JobOfferJpaRepositoryTest {
                 "Empresa A",
                 "Madrid",
                 "REMOTO",
-                "SOLICITADA"
+                "SOLICITADA",
+                null,
+                null,
+                null
         );
 
         assertEquals(1, result.size());
@@ -539,6 +569,9 @@ class JobOfferJpaRepositoryTest {
                 userId,
                 null,
                 "Barcelona",
+                null,
+                null,
+                null,
                 null,
                 null
         );
@@ -577,6 +610,9 @@ class JobOfferJpaRepositoryTest {
                 userId,
                 null,
                 "Madrid",
+                null,
+                null,
+                null,
                 null,
                 null
         );
@@ -687,6 +723,108 @@ class JobOfferJpaRepositoryTest {
         repository.save(secondOffer);
 
         assertEquals(2, repository.count());
+    }
+
+    @Test
+    void shouldSortByCreatedAtAscending() {
+        JobOfferEntity older = createJobOffer(
+                "Google",
+                "Older",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-old",
+                "LinkedIn",
+                "job-old"
+        );
+
+        JobOfferEntity newer = createJobOffer(
+                "Amazon",
+                "Newer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-new",
+                "LinkedIn",
+                "job-new"
+        );
+
+        older.setCreatedAt(
+                OffsetDateTime.parse("2026-01-01T10:00:00Z")
+        );
+
+        newer.setCreatedAt(
+                OffsetDateTime.parse("2026-02-01T10:00:00Z")
+        );
+
+        repository.saveAndFlush(newer);
+        repository.saveAndFlush(older);
+
+        List<JobOfferEntity> result = repository.findAll(
+                userId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "createdAt",
+                "asc"
+        );
+
+        assertEquals(2, result.size());
+        assertEquals("Older", result.get(0).getTitle());
+        assertEquals("Newer", result.get(1).getTitle());
+    }
+
+    @Test
+    void shouldSortByCreatedAtDescending() {
+        JobOfferEntity older = createJobOffer(
+                "Google",
+                "Older",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-old",
+                "LinkedIn",
+                "job-old"
+        );
+
+        JobOfferEntity newer = createJobOffer(
+                "Amazon",
+                "Newer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-new",
+                "LinkedIn",
+                "job-new"
+        );
+
+        older.setCreatedAt(
+                OffsetDateTime.parse("2026-01-01T10:00:00Z")
+        );
+
+        newer.setCreatedAt(
+                OffsetDateTime.parse("2026-02-01T10:00:00Z")
+        );
+
+        repository.saveAndFlush(newer);
+        repository.saveAndFlush(older);
+
+        List<JobOfferEntity> result = repository.findAll(
+                userId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "createdAt",
+                "desc"
+        );
+
+        assertEquals(2, result.size());
+        assertEquals("Newer", result.get(0).getTitle());
+        assertEquals("Older", result.get(1).getTitle());
     }
 
     private UserEntity createUser(String email) {

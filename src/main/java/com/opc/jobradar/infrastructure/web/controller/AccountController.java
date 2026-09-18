@@ -21,8 +21,10 @@ public class AccountController {
     }
 
     @GetMapping("/me")
-    public User me(HttpSession session) {
-        Long userId = (Long) session.getAttribute(USER_ID);
-        return getAuthenticatedUserService.getUser(userId);
-    }
+    public UserResponse me(HttpSession session) {
+    Long userId = (Long) session.getAttribute(USER_ID);
+    User user = getAuthenticatedUserService.getUser(userId);
+
+    return UserResponse.from(user);
+}
 }

@@ -78,4 +78,110 @@ class RegisterControllerTest {
                         )
                 );
     }
+    @Test
+    void shouldRejectBlankName() throws Exception {
+    RegisterUserService registerUserService =
+            org.mockito.Mockito.mock(RegisterUserService.class);
+
+    RegisterController controller =
+            new RegisterController(registerUserService);
+
+    MockMvc mockMvc =
+            standaloneSetup(controller).build();
+
+    mockMvc.perform(
+                    post("/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "",
+                                      "email": "jaime@email.com",
+                                      "password": "password"
+                                    }
+                                    """)
+            )
+            .andExpect(status().isBadRequest());
+}
+
+    @Test
+    void shouldRejectBlankEmail() throws Exception {
+    RegisterUserService registerUserService =
+            org.mockito.Mockito.mock(RegisterUserService.class);
+
+    RegisterController controller =
+            new RegisterController(registerUserService);
+
+    MockMvc mockMvc =
+            standaloneSetup(controller).build();
+
+    mockMvc.perform(
+                    post("/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "Jaime",
+                                      "email": "",
+                                      "password": "password"
+                                    }
+                                    """)
+            )
+            .andExpect(status().isBadRequest());
+}
+
+    @Test
+    void shouldRejectBlankPassword() throws Exception {
+    RegisterUserService registerUserService =
+            org.mockito.Mockito.mock(RegisterUserService.class);
+
+    RegisterController controller =
+            new RegisterController(registerUserService);
+
+    MockMvc mockMvc =
+            standaloneSetup(controller).build();
+
+    mockMvc.perform(
+                    post("/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "Jaime",
+                                      "email": "jaime@email.com",
+                                      "password": ""
+                                    }
+                                    """)
+            )
+            .andExpect(status().isBadRequest());
+}
+    @Test
+    void shouldRejectDuplicatedEmail() throws Exception {
+    RegisterUserService registerUserService =
+            org.mockito.Mockito.mock(RegisterUserService.class);
+
+    doThrow(new IllegalArgumentException("Email already registered"))
+            .when(registerUserService)
+            .register(
+                    "Jaime",
+                    "jaime@email.com",
+                    "password"
+            );
+
+    RegisterController controller =
+            new RegisterController(registerUserService);
+
+    MockMvc mockMvc =
+            standaloneSetup(controller).build();
+
+    mockMvc.perform(
+                    post("/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "Jaime",
+                                      "email": "jaime@email.com",
+                                      "password": "password"
+                                    }
+                                    """)
+            )
+            .andExpect(status().isBadRequest());
+}
 }

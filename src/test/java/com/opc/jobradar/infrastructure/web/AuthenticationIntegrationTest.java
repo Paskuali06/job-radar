@@ -2,6 +2,8 @@ package com.opc.jobradar.infrastructure.web;
 
 import com.opc.jobradar.application.service.LoginUserService;
 import com.opc.jobradar.domain.model.User;
+import com.opc.jobradar.application.service.GetAuthenticatedUserService;
+import com.opc.jobradar.domain.model.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,6 +30,9 @@ class AuthenticationIntegrationTest {
 
     @MockitoBean
     private LoginUserService loginUserService;
+
+    @MockitoBean
+    private GetAuthenticatedUserService getAuthenticatedUserService;
 
     @Test
     void shouldRejectProtectedEndpointWithoutAuthenticatedUser() throws Exception {
@@ -80,15 +86,15 @@ class AuthenticationIntegrationTest {
         return session;
     }
     @Test
-void shouldRejectAccessToAnotherUsersJobOffer() throws Exception {
+    void shouldRejectAccessToAnotherUsersJobOffer() throws Exception {
     mockMvc.perform(
             get("/job-offers/999")
                     .session(sessionWithUser())
     ).andExpect(status().isNotFound());
 }
 
-@Test
-void shouldRejectUpdateOfAnotherUsersJobOffer() throws Exception {
+    @Test
+    void shouldRejectUpdateOfAnotherUsersJobOffer() throws Exception {
     mockMvc.perform(
             put("/job-offers/999")
                     .session(sessionWithUser())
@@ -102,4 +108,27 @@ void shouldRejectUpdateOfAnotherUsersJobOffer() throws Exception {
                             """)
     ).andExpect(status().isNotFound());
 }
+    @Test
+    void shouldReturnAuthenticatedUserWithoutPassword() throws Exception {
+        User user = new User();
+        user.setId(1L);
+        user.setName("Jaime");
+        user.setEmail("jaime@test.com");
+        user.setPassword("secret");
+        user.setRole(UserRole.USER);
+
+        when(getAuthenticatedUserService.getUser(1L))
+                .thenReturn(user);
+
+        mockMvc.perform(
+                        get("/auth/me")
+                                .session(sessionWithUser())
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Jaime"))
+                .andExpect(jsonPath("$.email").value("jaime@test.com"))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
 }

@@ -28,10 +28,6 @@ class GetJobOffersServiceTest {
     private final GetJobOffersService getJobOffersService =
             new GetJobOffersService(jobOfferRepository);
 
-    // ============================================================
-    // CT-009 - Sin filtros devuelve todas las ofertas
-    // ============================================================
-
     @Test
     void shouldReturnAllJobOffersWhenNoFiltersAreProvided() {
         JobOffer madridOffer = createJobOffer(
@@ -75,10 +71,6 @@ class GetJobOffersServiceTest {
         assertSame(barcelonaOffer, result.get(1));
     }
 
-    // ============================================================
-    // CT-009 - Filtrar por empresa
-    // ============================================================
-
     @Test
     void shouldFilterJobOffersByCompany() {
         JobOffer googleOffer = createJobOffer(
@@ -107,10 +99,6 @@ class GetJobOffersServiceTest {
         assertEquals(1, result.size());
         assertSame(googleOffer, result.get(0));
     }
-
-    // ============================================================
-    // CT-009 - Filtrar por ubicación
-    // ============================================================
 
     @Test
     void shouldFilterJobOffersByLocation() {
@@ -141,10 +129,6 @@ class GetJobOffersServiceTest {
         assertSame(madridOffer, result.get(0));
     }
 
-    // ============================================================
-    // CT-009 - Filtrar por modalidad
-    // ============================================================
-
     @Test
     void shouldFilterJobOffersByWorkMode() {
         JobOffer remoteOffer = createJobOffer(
@@ -173,10 +157,6 @@ class GetJobOffersServiceTest {
         assertEquals(1, result.size());
         assertSame(remoteOffer, result.get(0));
     }
-
-    // ============================================================
-    // CT-009 - Filtrar por estado
-    // ============================================================
 
     @Test
     void shouldFilterJobOffersByStatus() {
@@ -207,10 +187,6 @@ class GetJobOffersServiceTest {
         assertSame(requestedOffer, result.get(0));
     }
 
-    // ============================================================
-    // CT-009 - Combinar dos filtros
-    // ============================================================
-
     @Test
     void shouldFilterJobOffersByLocationAndWorkMode() {
         JobOffer remoteMadridOffer = createJobOffer(
@@ -239,10 +215,6 @@ class GetJobOffersServiceTest {
         assertEquals(1, result.size());
         assertSame(remoteMadridOffer, result.get(0));
     }
-
-    // ============================================================
-    // CT-009 - Combinar tres filtros
-    // ============================================================
 
     @Test
     void shouldFilterJobOffersByLocationWorkModeAndStatus() {
@@ -273,10 +245,6 @@ class GetJobOffersServiceTest {
         assertSame(requestedRemoteMadridOffer, result.get(0));
     }
 
-    // ============================================================
-    // CT-009 - Combinar los cuatro filtros
-    // ============================================================
-
     @Test
     void shouldFilterJobOffersByAllFilters() {
         JobOffer matchingOffer = createJobOffer(
@@ -305,10 +273,6 @@ class GetJobOffersServiceTest {
         assertEquals(1, result.size());
         assertSame(matchingOffer, result.get(0));
     }
-
-    // ============================================================
-    // CT-009 - Los filtros se combinan mediante AND
-    // ============================================================
 
     @Test
     void shouldNarrowResultsWhenAddingFilters() {
@@ -402,15 +366,12 @@ class GetJobOffersServiceTest {
         assertEquals(2, madridResults.size());
         assertEquals(1, madridRemoteResults.size());
         assertEquals(1, madridRemoteRequestedResults.size());
+
         assertSame(
                 remoteMadridRequested,
                 madridRemoteRequestedResults.get(0)
         );
     }
-
-    // ============================================================
-    // CT-009 - Coincidencia exacta
-    // ============================================================
 
     @Test
     void shouldUseExactMatchForLocation() {
@@ -441,10 +402,6 @@ class GetJobOffersServiceTest {
         assertEquals("Madrid", result.get(0).getLocation());
     }
 
-    // ============================================================
-    // CT-009 - Ninguna coincidencia
-    // ============================================================
-
     @Test
     void shouldReturnEmptyListWhenNoJobOfferMatches() {
         FiltersByJobOffer filters = new FiltersByJobOffer(
@@ -464,10 +421,6 @@ class GetJobOffersServiceTest {
 
         assertEquals(0, result.size());
     }
-
-    // ============================================================
-    // CT-009 - Filtro vacío equivale a ausencia de filtro
-    // ============================================================
 
     @Test
     void shouldTreatEmptyFilterAsNoFilter() {
@@ -508,10 +461,6 @@ class GetJobOffersServiceTest {
         assertEquals(2, result.size());
     }
 
-    // ============================================================
-    // CT-009 - Filtro vacío + filtro válido
-    // ============================================================
-
     @Test
     void shouldIgnoreEmptyFilterWhenAnotherFilterIsProvided() {
         JobOffer requestedMadridOffer = createJobOffer(
@@ -541,10 +490,6 @@ class GetJobOffersServiceTest {
         assertSame(requestedMadridOffer, result.get(0));
     }
 
-    // ============================================================
-    // CT-009 - Normalización de filtros vacíos
-    // ============================================================
-
     @Test
     void shouldNormalizeEmptyFiltersBeforeCallingRepository() {
         FiltersByJobOffer filters = new FiltersByJobOffer(
@@ -572,10 +517,6 @@ class GetJobOffersServiceTest {
         assertEquals(null, capturedFilters.getStatus());
     }
 
-    // ============================================================
-    // CT-028 - El userId se utiliza para buscar las ofertas
-    // ============================================================
-
     @Test
     void shouldUseAuthenticatedUserIdWhenSearchingJobOffers() {
         FiltersByJobOffer filters = new FiltersByJobOffer(
@@ -591,6 +532,70 @@ class GetJobOffersServiceTest {
                 eq(10L),
                 any(FiltersByJobOffer.class)
         );
+    }
+
+    @Test
+    void shouldPassSearchFilterToRepository() {
+        FiltersByJobOffer filters = new FiltersByJobOffer(
+                null,
+                null,
+                null,
+                null
+        );
+
+        filters.setSearch("java");
+
+        when(jobOfferRepository.findAll(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of());
+
+        getJobOffersService.get(USER_ID, filters);
+
+        ArgumentCaptor<FiltersByJobOffer> captor =
+                ArgumentCaptor.forClass(FiltersByJobOffer.class);
+
+        verify(jobOfferRepository).findAll(
+                eq(USER_ID),
+                captor.capture()
+        );
+
+        FiltersByJobOffer capturedFilters = captor.getValue();
+
+        assertEquals("java", capturedFilters.getSearch());
+    }
+
+    @Test
+    void shouldPassSortParametersToRepository() {
+        FiltersByJobOffer filters = new FiltersByJobOffer(
+                null,
+                null,
+                null,
+                null
+        );
+
+        filters.setSortBy("createdAt");
+        filters.setSortDirection("desc");
+
+        when(jobOfferRepository.findAll(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of());
+
+        getJobOffersService.get(USER_ID, filters);
+
+        ArgumentCaptor<FiltersByJobOffer> captor =
+                ArgumentCaptor.forClass(FiltersByJobOffer.class);
+
+        verify(jobOfferRepository).findAll(
+                eq(USER_ID),
+                captor.capture()
+        );
+
+        FiltersByJobOffer capturedFilters = captor.getValue();
+
+        assertEquals("createdAt", capturedFilters.getSortBy());
+        assertEquals("desc", capturedFilters.getSortDirection());
     }
 
     private JobOffer createJobOffer(

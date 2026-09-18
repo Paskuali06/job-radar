@@ -48,7 +48,61 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
-                "SOLICITADA"
+                "SOLICITADA",
+                null,
+                null,
+                null
+        );
+    }
+
+    @Test
+    void shouldTranslateSearchFilterToRepositoryParameter() {
+        FiltersByJobOffer filters = new FiltersByJobOffer(
+                null,
+                null,
+                null,
+                null
+        );
+
+        filters.setSearch("java");
+
+        adapter.findAll(USER_ID, filters);
+
+        verify(repository).findAll(
+                USER_ID,
+                null,
+                null,
+                null,
+                null,
+                "java",
+                null,
+                null
+        );
+    }
+
+    @Test
+    void shouldTranslateSortParametersToRepositoryParameters() {
+        FiltersByJobOffer filters = new FiltersByJobOffer(
+                null,
+                null,
+                null,
+                null
+        );
+
+        filters.setSortBy("createdAt");
+        filters.setSortDirection("desc");
+
+        adapter.findAll(USER_ID, filters);
+
+        verify(repository).findAll(
+                USER_ID,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "createdAt",
+                "desc"
         );
     }
 
@@ -83,6 +137,9 @@ class JobOfferPersistenceAdapterTest {
 
         when(repository.findAll(
                 USER_ID,
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -143,6 +200,9 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
                 null
         )).thenReturn(List.of(firstEntity, secondEntity));
 
@@ -166,6 +226,9 @@ class JobOfferPersistenceAdapterTest {
     void shouldReturnEmptyListWhenRepositoryReturnsNoResults() {
         when(repository.findAll(
                 USER_ID,
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,

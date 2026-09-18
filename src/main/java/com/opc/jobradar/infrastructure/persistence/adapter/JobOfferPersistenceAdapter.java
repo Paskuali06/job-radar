@@ -87,7 +87,10 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
                         filters.getWorkMode(),
                         filters.getStatus() == null
                                 ? null
-                                : filters.getStatus().name()
+                                : filters.getStatus().name(),
+                        filters.getSearch(),
+                        filters.getSortBy(),
+                        filters.getSortDirection()
                 )
                 .stream()
                 .map(mapper::toDomain)
