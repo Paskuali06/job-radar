@@ -990,4 +990,107 @@ class JobOfferJpaRepositoryTest {
 
         return entity;
     }
+    @Test
+    void shouldCountAllJobOffersBelongingToUser() {
+    JobOfferEntity firstOffer = createJobOffer(
+            "Empresa A",
+            "Backend Developer",
+            "Madrid",
+            "REMOTO",
+            "PENDIENTE",
+            "https://example.com/job-a",
+            "LinkedIn",
+            "job-a"
+    );
+
+    JobOfferEntity secondOffer = createJobOffer(
+            "Empresa B",
+            "Java Developer",
+            "Barcelona",
+            "HIBRIDO",
+            "SOLICITADA",
+            "https://example.com/job-b",
+            "Indeed",
+            "job-b"
+    );
+
+    JobOfferEntity otherUserOffer = createJobOffer(
+            "Empresa C",
+            "Full Stack Developer",
+            "Sevilla",
+            "REMOTO",
+            "RECHAZADA",
+            "https://example.com/job-c",
+            "InfoJobs",
+            "job-c"
+    );
+
+    otherUserOffer.setUserId(secondUserId);
+
+    repository.save(firstOffer);
+    repository.save(secondOffer);
+    repository.save(otherUserOffer);
+
+    long result = repository.countByUserId(userId);
+
+    assertEquals(2, result);
+}
+
+    @Test
+    void shouldCountJobOffersByUserAndStatus() {
+    JobOfferEntity pendingOffer = createJobOffer(
+            "Empresa A",
+            "Backend Developer",
+            "Madrid",
+            "REMOTO",
+            "PENDIENTE",
+            "https://example.com/job-a",
+            "LinkedIn",
+            "job-a"
+    );
+
+    JobOfferEntity requestedOffer = createJobOffer(
+            "Empresa B",
+            "Java Developer",
+            "Barcelona",
+            "HIBRIDO",
+            "SOLICITADA",
+            "https://example.com/job-b",
+            "Indeed",
+            "job-b"
+    );
+    JobOfferEntity rejectedOffer = createJobOffer(
+        "Empresa C",
+        "Full Stack Developer",
+        "Sevilla",
+        "REMOTO",
+        "RECHAZADA",
+        "https://example.com/job-c",
+        "InfoJobs",
+        "job-c"
+);
+
+repository.save(pendingOffer);
+repository.save(requestedOffer);
+repository.save(rejectedOffer);
+
+long pendingResult = repository.countByUserIdAndStatus(
+        userId,
+        "PENDIENTE"
+);
+
+long requestedResult = repository.countByUserIdAndStatus(
+        userId,
+        "SOLICITADA"
+);
+
+long rejectedResult = repository.countByUserIdAndStatus(
+        userId,
+        "RECHAZADA"
+);
+
+    assertEquals(1, pendingResult);
+    assertEquals(1, requestedResult);
+    assertEquals(1, rejectedResult);
+}
 }

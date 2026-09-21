@@ -85,6 +85,26 @@ public interface JobOfferRepository {
     );
 
     /**
+     * Cuenta todas las ofertas pertenecientes a un usuario.
+     *
+     * @param userId identificador del usuario propietario
+     * @return número total de ofertas del usuario
+     */
+    long countByUserId(Long userId);
+
+    /**
+     * Cuenta las ofertas de un usuario que tienen un estado determinado.
+     *
+     * @param userId identificador del usuario propietario
+     * @param status estado de las ofertas
+     * @return número de ofertas del usuario con el estado indicado
+     */
+    long countByUserIdAndStatus(
+            Long userId,
+            String status
+    );
+
+    /**
      * Elimina una oferta de empleo por su identificador interno.
      *
      * @param id identificador de la oferta que se quiere eliminar

@@ -30,6 +30,13 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
 
     Optional<JobOfferEntity> findByIdAndUserId(Long id, Long userId);
 
+    long countByUserId(Long userId);
+
+    long countByUserIdAndStatus(
+            Long userId,
+            String status
+    );
+
     /**
      * Busca las ofertas de un usuario aplicando los filtros proporcionados,
      * la ordenación solicitada y, cuando se proporciona, la paginación.

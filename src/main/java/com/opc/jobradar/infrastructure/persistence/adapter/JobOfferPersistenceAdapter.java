@@ -114,6 +114,19 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
     }
 
     @Override
+    public long countByUserId(Long userId) {
+        return repository.countByUserId(userId);
+    }
+
+    @Override
+    public long countByUserIdAndStatus(
+            Long userId,
+            String status
+    ) {
+        return repository.countByUserIdAndStatus(userId, status);
+    }
+
+    @Override
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
