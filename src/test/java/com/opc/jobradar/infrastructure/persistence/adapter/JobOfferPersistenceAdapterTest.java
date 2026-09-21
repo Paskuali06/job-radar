@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -51,7 +52,8 @@ class JobOfferPersistenceAdapterTest {
                 "SOLICITADA",
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
     }
 
@@ -76,7 +78,8 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 "java",
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
     }
 
@@ -102,7 +105,8 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 "createdAt",
-                "desc"
+                "desc",
+                Pageable.unpaged()
         );
     }
 
@@ -143,7 +147,8 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         )).thenReturn(List.of(entity));
 
         when(mapper.toDomain(entity))
@@ -203,7 +208,8 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         )).thenReturn(List.of(firstEntity, secondEntity));
 
         when(mapper.toDomain(firstEntity))
@@ -232,7 +238,8 @@ class JobOfferPersistenceAdapterTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         )).thenReturn(List.of());
 
         List<JobOffer> result = adapter.findAll(

@@ -49,6 +49,14 @@ public class GetJobOffersService {
         normalizedFilters.setSortDirection(
                 filters == null ? null : filters.getSortDirection()
         );
+        
+        normalizedFilters.setPage(
+        filters == null ? null : filters.getPage()
+        );
+
+        normalizedFilters.setSize(
+        filters == null ? null : filters.getSize()
+        );
 
         return jobOfferRepository.findAll(
                 userId,

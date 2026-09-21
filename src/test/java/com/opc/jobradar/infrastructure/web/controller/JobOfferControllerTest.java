@@ -12,6 +12,7 @@ import com.opc.jobradar.domain.model.FiltersByJobOffer;
 import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -648,7 +650,7 @@ class JobOfferControllerTest {
                                     "title": "Java Developer",
                                     "location": "Madrid",
                                     "workMode": "Remoto",
-                                    "url": "https://example.com/job",
+                                    "url": "",
                                     "source": "LINKEDIN",
                                     "externalId": ""
                                 }
@@ -758,5 +760,46 @@ class JobOfferControllerTest {
 
         verify(deleteJobOfferService, never())
                 .delete(any(Long.class), any(Long.class));
+    }
+
+    @Test
+    void shouldApplySearchSortingAndPaginationParameters() throws Exception {
+        when(getJobOffersService.get(
+                eq(USER_ID),
+                any(FiltersByJobOffer.class)
+        )).thenReturn(List.of());
+
+        mockMvc.perform(get("/job-offers")
+                        .session(authenticatedSession())
+                        .param("company", "Google")
+                        .param("location", "Madrid")
+                        .param("workMode", "REMOTO")
+                        .param("status", "SOLICITADA")
+                        .param("search", "java")
+                        .param("sortBy", "createdAt")
+                        .param("sortDirection", "desc")
+                        .param("page", "2")
+                        .param("size", "10"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<FiltersByJobOffer> captor =
+                ArgumentCaptor.forClass(FiltersByJobOffer.class);
+
+        verify(getJobOffersService).get(
+                eq(USER_ID),
+                captor.capture()
+        );
+
+        FiltersByJobOffer filters = captor.getValue();
+
+        assertEquals("Google", filters.getCompany());
+        assertEquals("Madrid", filters.getLocation());
+        assertEquals("REMOTO", filters.getWorkMode());
+        assertEquals(JobOfferStatus.SOLICITADA, filters.getStatus());
+        assertEquals("java", filters.getSearch());
+        assertEquals("createdAt", filters.getSortBy());
+        assertEquals("desc", filters.getSortDirection());
+        assertEquals(2, filters.getPage());
+        assertEquals(10, filters.getSize());
     }
 }

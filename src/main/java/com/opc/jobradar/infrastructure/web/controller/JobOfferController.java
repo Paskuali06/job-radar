@@ -13,6 +13,10 @@ import com.opc.jobradar.domain.model.JobOffer;
 import com.opc.jobradar.domain.model.JobOfferStatus;
 import com.opc.jobradar.infrastructure.web.UpdateJobOfferRequest;
 import com.opc.jobradar.infrastructure.web.UpdateJobOfferStatusRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -36,6 +40,10 @@ import java.util.List;
 /**
  * Adaptador HTTP para la gestión de ofertas de empleo.
  */
+@Tag(
+        name = "Job Offers",
+        description = "Gestión de ofertas de empleo del usuario autenticado"
+)
 @RestController
 @RequestMapping("/job-offers")
 public class JobOfferController {
@@ -71,6 +79,24 @@ public class JobOfferController {
      * @param session sesión HTTP del usuario autenticado
      * @return oferta creada con HTTP 201 Created
      */
+    @Operation(
+            summary = "Crear una oferta de empleo",
+            description = "Crea una nueva oferta de empleo para el usuario autenticado."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Oferta creada correctamente"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Datos de entrada no válidos"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "La oferta ya existe"
+            )
+    })
     @PostMapping
     public ResponseEntity<JobOffer> create(
             @Valid @RequestBody CreateJobOfferRequest request,
@@ -112,6 +138,20 @@ public class JobOfferController {
      * @param session sesión HTTP del usuario autenticado
      * @return oferta encontrada con HTTP 200 OK
      */
+    @Operation(
+            summary = "Obtener una oferta de empleo",
+            description = "Obtiene una oferta perteneciente al usuario autenticado."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Oferta encontrada"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Oferta no encontrada"
+            )
+    })
     @GetMapping("/{id}")
     public ResponseEntity<JobOffer> getById(
             @PathVariable Long id,
@@ -126,21 +166,42 @@ public class JobOfferController {
     }
 
     /**
-     * Obtiene las ofertas de empleo aplicando filtros opcionales.
+     * Obtiene las ofertas de empleo aplicando filtros opcionales,
+     * búsqueda, ordenación y paginación.
      *
      * @param company empresa
      * @param location ubicación
      * @param workMode modalidad de trabajo
      * @param status estado de la oferta
+     * @param search texto de búsqueda
+     * @param sortBy campo por el que ordenar
+     * @param sortDirection dirección de ordenación
+     * @param page número de página
+     * @param size número de elementos por página
      * @param session sesión HTTP del usuario autenticado
-     * @return ofertas del usuario que cumplen los filtros
+     * @return ofertas del usuario que cumplen los criterios solicitados
      */
+    @Operation(
+            summary = "Obtener ofertas de empleo",
+            description = "Obtiene las ofertas del usuario autenticado aplicando filtros, búsqueda, ordenación y paginación."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Ofertas obtenidas correctamente"
+            )
+    })
     @GetMapping
     public ResponseEntity<List<JobOffer>> getAll(
             @RequestParam(required = false) String company,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String workMode,
             @RequestParam(required = false) JobOfferStatus status,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             HttpSession session) {
 
         FiltersByJobOffer filters = new FiltersByJobOffer(
@@ -149,6 +210,12 @@ public class JobOfferController {
                 workMode,
                 status
         );
+
+        filters.setSearch(search);
+        filters.setSortBy(sortBy);
+        filters.setSortDirection(sortDirection);
+        filters.setPage(page);
+        filters.setSize(size);
 
         List<JobOffer> jobOffers = getJobOffersService.get(
                 getUserId(session),
@@ -166,6 +233,24 @@ public class JobOfferController {
      * @param session sesión HTTP del usuario autenticado
      * @return oferta actualizada con HTTP 200 OK
      */
+    @Operation(
+            summary = "Actualizar el estado de una oferta",
+            description = "Actualiza el estado de una oferta perteneciente al usuario autenticado."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Estado actualizado correctamente"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Oferta no encontrada"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Datos de entrada no válidos"
+            )
+    })
     @PatchMapping("/{id}/status")
     public ResponseEntity<JobOffer> updateStatus(
             @PathVariable Long id,
@@ -208,6 +293,20 @@ public class JobOfferController {
      * @param session sesión HTTP del usuario autenticado
      * @return respuesta HTTP 204 No Content
      */
+    @Operation(
+            summary = "Eliminar una oferta de empleo",
+            description = "Elimina una oferta perteneciente al usuario autenticado."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Oferta eliminada correctamente"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Oferta no encontrada"
+            )
+    })
     @DeleteMapping("/{id}")
     public void delete(
             @PathVariable Long id,
@@ -227,6 +326,24 @@ public class JobOfferController {
      * @param session sesión HTTP del usuario autenticado
      * @return oferta actualizada con HTTP 200 OK
      */
+    @Operation(
+            summary = "Actualizar una oferta de empleo",
+            description = "Actualiza los datos de una oferta perteneciente al usuario autenticado."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Oferta actualizada correctamente"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Datos de entrada no válidos"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Oferta no encontrada"
+            )
+    })
     @PutMapping("/{id}")
     public ResponseEntity<JobOffer> update(
             @PathVariable Long id,

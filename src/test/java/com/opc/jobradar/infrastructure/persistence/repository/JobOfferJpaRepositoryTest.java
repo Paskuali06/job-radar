@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
@@ -75,7 +77,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(2, result.size());
@@ -164,7 +167,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -209,7 +213,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -264,7 +269,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -306,7 +312,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -348,7 +355,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -390,7 +398,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -432,7 +441,8 @@ class JobOfferJpaRepositoryTest {
                 "SOLICITADA",
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -486,7 +496,8 @@ class JobOfferJpaRepositoryTest {
                 "SOLICITADA",
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -540,7 +551,8 @@ class JobOfferJpaRepositoryTest {
                 "SOLICITADA",
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -573,7 +585,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(0, result.size());
@@ -614,7 +627,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                Pageable.unpaged()
         );
 
         assertEquals(1, result.size());
@@ -768,7 +782,8 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 "createdAt",
-                "asc"
+                "asc",
+                Pageable.unpaged()
         );
 
         assertEquals(2, result.size());
@@ -819,12 +834,121 @@ class JobOfferJpaRepositoryTest {
                 null,
                 null,
                 "createdAt",
-                "desc"
+                "desc",
+                Pageable.unpaged()
         );
 
         assertEquals(2, result.size());
         assertEquals("Newer", result.get(0).getTitle());
         assertEquals("Older", result.get(1).getTitle());
+    }
+
+    @Test
+    void shouldReturnFirstPageOfJobOffers() {
+        JobOfferEntity firstOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-a"
+        );
+
+        JobOfferEntity secondOffer = createJobOffer(
+                "Empresa B",
+                "Java Developer",
+                "Barcelona",
+                "HIBRIDO",
+                "SOLICITADA",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-b"
+        );
+
+        JobOfferEntity thirdOffer = createJobOffer(
+                "Empresa C",
+                "Full Stack Developer",
+                "Sevilla",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-c",
+                "InfoJobs",
+                "job-c"
+        );
+
+        repository.save(firstOffer);
+        repository.save(secondOffer);
+        repository.save(thirdOffer);
+
+        List<JobOfferEntity> result = repository.findAll(
+                userId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                PageRequest.of(0, 2)
+        );
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void shouldReturnSecondPageOfJobOffers() {
+        JobOfferEntity firstOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-a"
+        );
+
+        JobOfferEntity secondOffer = createJobOffer(
+                "Empresa B",
+                "Java Developer",
+                "Barcelona",
+                "HIBRIDO",
+                "SOLICITADA",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-b"
+        );
+
+        JobOfferEntity thirdOffer = createJobOffer(
+                "Empresa C",
+                "Full Stack Developer",
+                "Sevilla",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-c",
+                "InfoJobs",
+                "job-c"
+        );
+
+        repository.save(firstOffer);
+        repository.save(secondOffer);
+        repository.save(thirdOffer);
+
+        List<JobOfferEntity> result = repository.findAll(
+                userId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                PageRequest.of(1, 2)
+        );
+
+        assertEquals(1, result.size());
     }
 
     private UserEntity createUser(String email) {

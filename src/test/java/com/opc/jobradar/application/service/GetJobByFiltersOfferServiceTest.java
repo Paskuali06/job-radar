@@ -615,4 +615,36 @@ class GetJobOffersServiceTest {
 
         return jobOffer;
     }
+    @Test
+    void shouldPassPaginationParametersToRepository() {
+    FiltersByJobOffer filters = new FiltersByJobOffer(
+            null,
+            null,
+            null,
+            null
+    );
+
+    filters.setPage(1);
+    filters.setSize(10);
+
+    when(jobOfferRepository.findAll(
+            eq(USER_ID),
+            any(FiltersByJobOffer.class)
+    )).thenReturn(List.of());
+
+    getJobOffersService.get(USER_ID, filters);
+
+    ArgumentCaptor<FiltersByJobOffer> captor =
+            ArgumentCaptor.forClass(FiltersByJobOffer.class);
+
+    verify(jobOfferRepository).findAll(
+            eq(USER_ID),
+            captor.capture()
+    );
+
+    FiltersByJobOffer capturedFilters = captor.getValue();
+
+    assertEquals(1, capturedFilters.getPage());
+    assertEquals(10, capturedFilters.getSize());
+}
 }

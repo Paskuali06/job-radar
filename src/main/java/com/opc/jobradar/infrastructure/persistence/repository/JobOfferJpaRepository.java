@@ -1,6 +1,7 @@
 package com.opc.jobradar.infrastructure.persistence.repository;
 
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,8 +31,8 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
     Optional<JobOfferEntity> findByIdAndUserId(Long id, Long userId);
 
     /**
-     * Busca las ofertas de un usuario aplicando los filtros proporcionados
-     * y la ordenación solicitada.
+     * Busca las ofertas de un usuario aplicando los filtros proporcionados,
+     * la ordenación solicitada y, cuando se proporciona, la paginación.
      *
      * @param userId identificador del usuario propietario
      * @param company empresa de la oferta
@@ -41,6 +42,7 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
      * @param search texto de búsqueda sobre empresa, título o descripción
      * @param sortBy campo por el que ordenar
      * @param sortDirection dirección de ordenación
+     * @param pageable configuración de paginación
      * @return ofertas del usuario que cumplen los filtros proporcionados
      */
     @Query("""
@@ -97,6 +99,7 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
             @Param("status") String status,
             @Param("search") String search,
             @Param("sortBy") String sortBy,
-            @Param("sortDirection") String sortDirection
+            @Param("sortDirection") String sortDirection,
+            Pageable pageable
     );
 }

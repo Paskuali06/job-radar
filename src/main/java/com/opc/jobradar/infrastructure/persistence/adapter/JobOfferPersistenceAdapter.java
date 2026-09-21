@@ -6,6 +6,8 @@ import com.opc.jobradar.domain.port.out.JobOfferRepository;
 import com.opc.jobradar.infrastructure.persistence.entity.JobOfferEntity;
 import com.opc.jobradar.infrastructure.persistence.mapper.JobOfferMapper;
 import com.opc.jobradar.infrastructure.persistence.repository.JobOfferJpaRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -80,6 +82,8 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
             Long userId,
             FiltersByJobOffer filters
     ) {
+        Pageable pageable = createPageable(filters);
+
         return repository.findAll(
                         userId,
                         filters.getCompany(),
@@ -90,11 +94,23 @@ public class JobOfferPersistenceAdapter implements JobOfferRepository {
                                 : filters.getStatus().name(),
                         filters.getSearch(),
                         filters.getSortBy(),
-                        filters.getSortDirection()
+                        filters.getSortDirection(),
+                        pageable
                 )
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    private Pageable createPageable(FiltersByJobOffer filters) {
+        if (filters.getPage() == null || filters.getSize() == null) {
+            return Pageable.unpaged();
+        }
+
+        return PageRequest.of(
+                filters.getPage(),
+                filters.getSize()
+        );
     }
 
     @Override

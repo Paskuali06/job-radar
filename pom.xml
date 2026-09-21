@@ -17,7 +17,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>opc-job-radar</name>
-	<description>OPC Job Radar - Job Tracking and Deduplication API</description>
+	<description>OPC Job Tracking and Deduplication API</description>
 	<url/>
 
 	<licenses>
@@ -65,6 +65,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+
+		<!-- API Documentation -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.1.1</version>
 		</dependency>
 
 		<!-- Password hashing -->
