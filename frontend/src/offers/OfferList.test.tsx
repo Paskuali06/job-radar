@@ -1,7 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import OfferList from './OfferList'
-import { deleteOffer, updateOffer, updateOfferStatus } from './offerService'
+import {
+  deleteOffer,
+  updateOffer,
+  updateOfferStatus,
+  type JobOffer
+} from './offerService'
 
 vi.mock('./offerService', () => ({
   updateOfferStatus: vi.fn(),
@@ -11,14 +16,14 @@ vi.mock('./offerService', () => ({
 
 describe('OfferList', () => {
   it('should render the job offers', () => {
-    const offers = [
+    const offers: JobOffer[] = [
       {
         id: 1,
         company: 'Empresa A',
         title: 'Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
-        status: 'PENDING'
+        status: 'PENDIENTE'
       },
       {
         id: 2,
@@ -26,7 +31,7 @@ describe('OfferList', () => {
         title: 'Spring Boot Developer',
         location: 'Barcelona',
         workMode: 'HYBRID',
-        status: 'APPLIED'
+        status: 'SOLICITADA'
       }
     ]
 
@@ -36,13 +41,13 @@ describe('OfferList', () => {
     expect(screen.getByText('Empresa A')).toBeInTheDocument()
     expect(screen.getByText('Madrid')).toBeInTheDocument()
     expect(screen.getByText('REMOTE')).toBeInTheDocument()
-    expect(screen.getByText('PENDING')).toBeInTheDocument()
+    expect(screen.getByText('PENDIENTE')).toBeInTheDocument()
 
     expect(screen.getByText('Spring Boot Developer')).toBeInTheDocument()
     expect(screen.getByText('Empresa B')).toBeInTheDocument()
     expect(screen.getByText('Barcelona')).toBeInTheDocument()
     expect(screen.getByText('HYBRID')).toBeInTheDocument()
-    expect(screen.getByText('APPLIED')).toBeInTheDocument()
+    expect(screen.getByText('SOLICITADA')).toBeInTheDocument()
   })
 
   it('should show a message when there are no job offers', () => {
@@ -54,14 +59,14 @@ describe('OfferList', () => {
   it('should update the offer status when clicking the button', async () => {
     vi.mocked(updateOfferStatus).mockResolvedValue(undefined)
 
-    const offers = [
+    const offers: JobOffer[] = [
       {
         id: 1,
         company: 'Empresa A',
         title: 'Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
-        status: 'PENDING'
+        status: 'PENDIENTE'
       }
     ]
 
@@ -72,50 +77,50 @@ describe('OfferList', () => {
     )
 
     await waitFor(() => {
-      expect(updateOfferStatus).toHaveBeenCalledWith(1, 'APPLIED')
+      expect(updateOfferStatus).toHaveBeenCalledWith(1, 'SOLICITADA')
     })
   })
 
   it('should show the updated status after applying an offer', async () => {
     vi.mocked(updateOfferStatus).mockResolvedValue(undefined)
 
-    const offers = [
+    const offers: JobOffer[] = [
       {
         id: 1,
         company: 'Empresa A',
         title: 'Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
-        status: 'PENDING'
+        status: 'PENDIENTE'
       }
     ]
 
     render(<OfferList offers={offers} />)
 
-    expect(screen.getByText('PENDING')).toBeInTheDocument()
+    expect(screen.getByText('PENDIENTE')).toBeInTheDocument()
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Marcar como aplicada' })
     )
 
     await waitFor(() => {
-      expect(screen.getByText('APPLIED')).toBeInTheDocument()
+      expect(screen.getByText('SOLICITADA')).toBeInTheDocument()
     })
 
-    expect(screen.queryByText('PENDING')).not.toBeInTheDocument()
+    expect(screen.queryByText('PENDIENTE')).not.toBeInTheDocument()
   })
 
   it('should delete the offer when clicking the delete button', async () => {
     vi.mocked(deleteOffer).mockResolvedValue(undefined)
 
-    const offers = [
+    const offers: JobOffer[] = [
       {
         id: 1,
         company: 'Empresa A',
         title: 'Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
-        status: 'PENDING'
+        status: 'PENDIENTE'
       }
     ]
 
@@ -129,47 +134,48 @@ describe('OfferList', () => {
       expect(deleteOffer).toHaveBeenCalledWith(1)
     })
   })
+
   it('should update the offer when saving the edit form', async () => {
-  vi.mocked(updateOffer).mockResolvedValue(undefined)
+    vi.mocked(updateOffer).mockResolvedValue(undefined)
 
-  const offers = [
-    {
-      id: 1,
-      company: 'Empresa A',
-      title: 'Java Developer',
-      location: 'Madrid',
-      workMode: 'REMOTE',
-      status: 'PENDING'
-    }
-  ]
+    const offers: JobOffer[] = [
+      {
+        id: 1,
+        company: 'Empresa A',
+        title: 'Java Developer',
+        location: 'Madrid',
+        workMode: 'REMOTE',
+        status: 'PENDIENTE'
+      }
+    ]
 
-  render(<OfferList offers={offers} />)
+    render(<OfferList offers={offers} />)
 
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Editar oferta' })
-  )
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Editar oferta' })
+    )
 
-  fireEvent.change(screen.getByLabelText('Empresa'), {
-    target: { value: 'Empresa Nueva' }
-  })
+    fireEvent.change(screen.getByLabelText('Empresa'), {
+      target: { value: 'Empresa Nueva' }
+    })
 
-  fireEvent.change(screen.getByLabelText('Título'), {
-    target: { value: 'Senior Java Developer' }
-  })
+    fireEvent.change(screen.getByLabelText('Título'), {
+      target: { value: 'Senior Java Developer' }
+    })
 
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Guardar cambios' })
-  )
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Guardar cambios' })
+    )
 
-  await waitFor(() => {
-    expect(updateOffer).toHaveBeenCalledWith(1, {
-      company: 'Empresa Nueva',
-      title: 'Senior Java Developer',
-      location: 'Madrid',
-      workMode: 'REMOTE',
-      url: '',
-      description: ''
+    await waitFor(() => {
+      expect(updateOffer).toHaveBeenCalledWith(1, {
+        company: 'Empresa Nueva',
+        title: 'Senior Java Developer',
+        location: 'Madrid',
+        workMode: 'REMOTE',
+        url: '',
+        description: ''
+      })
     })
   })
-})
 })

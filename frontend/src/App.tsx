@@ -1,22 +1,31 @@
 import { useEffect, useState } from 'react'
 import LoginForm from './auth/LoginForm'
-import { getOffers, type JobOffer } from './offers/offerService'
+import Dashboard from './dashboard/Dashboard'
+import OfferFilters from './offers/OfferFilters'
+import {
+  getOffers,
+  type JobOffer,
+  type JobOfferFilters
+} from './offers/offerService'
 import OfferList from './offers/OfferList'
 
 function App() {
   const [offers, setOffers] = useState<JobOffer[]>([])
   const [error, setError] = useState(false)
 
-  useEffect(() => {
-    const loadOffers = async () => {
-      try {
-        const result = await getOffers()
-        setOffers(result)
-      } catch {
-        setError(true)
-      }
-    }
+  const loadOffers = async (filters: JobOfferFilters = {}) => {
+    try {
+      setError(false)
 
+      const result = await getOffers(filters)
+
+      setOffers(result)
+    } catch {
+      setError(true)
+    }
+  }
+
+  useEffect(() => {
     loadOffers()
   }, [])
 
@@ -29,6 +38,10 @@ function App() {
       <h1>Job-Radar</h1>
 
       <LoginForm onLogin={handleLogin} />
+
+      <Dashboard />
+
+      <OfferFilters onFilter={loadOffers} />
 
       {error ? (
         <p>No se pudieron cargar las ofertas</p>

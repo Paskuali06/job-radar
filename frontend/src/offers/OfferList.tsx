@@ -3,7 +3,8 @@ import {
   deleteOffer,
   updateOffer,
   updateOfferStatus,
-  type JobOffer
+  type JobOffer,
+  type JobOfferStatus
 } from './offerService'
 
 type OfferListProps = {
@@ -21,7 +22,7 @@ type EditFormData = {
 
 function OfferList({ offers }: OfferListProps) {
   const [updatedStatuses, setUpdatedStatuses] = useState<
-    Record<number, string>
+    Record<number, JobOfferStatus>
   >({})
 
   const [deletedOffers, setDeletedOffers] = useState<number[]>([])
@@ -38,11 +39,11 @@ function OfferList({ offers }: OfferListProps) {
   })
 
   const handleApply = async (id: number) => {
-    await updateOfferStatus(id, 'APPLIED')
+    await updateOfferStatus(id, 'SOLICITADA')
 
     setUpdatedStatuses((currentStatuses) => ({
       ...currentStatuses,
-      [id]: 'APPLIED'
+      [id]: 'SOLICITADA'
     }))
   }
 
@@ -187,7 +188,7 @@ function OfferList({ offers }: OfferListProps) {
             <p>{offer.workMode}</p>
             <p>{status}</p>
 
-            {status !== 'APPLIED' && (
+            {status !== 'SOLICITADA' && (
               <button
                 type="button"
                 onClick={() => handleApply(offer.id)}
