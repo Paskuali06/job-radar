@@ -2,7 +2,7 @@ export async function login(
   email: string,
   password: string
 ): Promise<void> {
-  const response = await fetch('/login', {
+  const response = await fetch('/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -14,6 +14,6 @@ export async function login(
   })
 
   if (!response.ok) {
-    throw new Error('Error al iniciar sesión')
+    throw new Error('No se pudo iniciar sesión')
   }
 }

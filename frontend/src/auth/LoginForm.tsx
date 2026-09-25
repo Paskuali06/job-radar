@@ -2,16 +2,17 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 
 type LoginFormProps = {
-  onLogin: (email: string, password: string) => void
+  onLogin: (email: string, password: string) => Promise<void>
 }
 
 function LoginForm({ onLogin }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    onLogin(email, password)
+
+    await onLogin(email, password)
   }
 
   return (

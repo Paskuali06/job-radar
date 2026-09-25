@@ -11,18 +11,27 @@ describe('authService', () => {
 
     await login('usuario@email.com', 'password123')
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/login',
-      expect.objectContaining({
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: 'usuario@email.com',
-          password: 'password123'
-        })
+    expect(fetchMock).toHaveBeenCalledWith('/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: 'usuario@email.com',
+        password: 'password123'
       })
-    )
+    })
+  })
+
+  it('should throw when login fails', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      login('usuario@email.com', 'password123')
+    ).rejects.toThrow('No se pudo iniciar sesión')
   })
 })

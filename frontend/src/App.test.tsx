@@ -1,8 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { login } from './auth/authService'
 import { getOffers } from './offers/offerService'
 import { getDashboard } from './dashboard/dashboardService'
+
+vi.mock('./auth/authService', () => ({
+  login: vi.fn()
+}))
 
 vi.mock('./offers/offerService', () => ({
   getOffers: vi.fn()
@@ -116,6 +121,69 @@ describe('App', () => {
       expect(getOffers).toHaveBeenLastCalledWith({
         company: 'Empresa A'
       })
+    })
+  })
+
+  it('should login the user when submitting the login form', async () => {
+    vi.mocked(login).mockResolvedValue(undefined)
+
+    render(<App />)
+
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: {
+        value: 'usuario@email.com'
+      }
+    })
+
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: {
+        value: 'password123'
+      }
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Iniciar sesión'
+      })
+    )
+
+    await waitFor(() => {
+      expect(login).toHaveBeenCalledWith(
+        'usuario@email.com',
+        'password123'
+      )
+    })
+  })
+
+  it('should show an error when login fails', async () => {
+    vi.mocked(login).mockRejectedValue(
+      new Error('No se pudo iniciar sesión')
+    )
+
+    render(<App />)
+
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: {
+        value: 'usuario@email.com'
+      }
+    })
+
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: {
+        value: 'password123'
+      }
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Iniciar sesión'
+      })
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('No se pudo iniciar sesión')
+      ).toBeInTheDocument()
     })
   })
 })
