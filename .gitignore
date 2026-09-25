@@ -34,3 +34,8 @@ build/
 
 # AI / Codex instructions
 AGENTS.md
+
+# Environment variables
+.env
+.env.*
+!.env.example
