@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { login } from './auth/authService'
 import LoginForm from './auth/LoginForm'
+import Account from './account/Account'
 import Dashboard from './dashboard/Dashboard'
 import OfferFilters from './offers/OfferFilters'
 import {
@@ -54,6 +55,8 @@ function App() {
         <p>No se pudo iniciar sesión</p>
       )}
 
+      <Account />
+
       <Dashboard />
 
       <OfferFilters onFilter={loadOffers} />
@@ -68,4 +71,3 @@ function App() {
 }
 
 export default App
-

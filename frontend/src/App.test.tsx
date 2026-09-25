@@ -1,5 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor
+} from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { login } from './auth/authService'
 import { getOffers } from './offers/offerService'
@@ -18,8 +23,11 @@ vi.mock('./dashboard/dashboardService', () => ({
 }))
 
 describe('App', () => {
-  it('should render the application name', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+
     vi.mocked(getOffers).mockResolvedValue([])
+
     vi.mocked(getDashboard).mockResolvedValue({
       totalOffers: 0,
       pendingOffers: 0,
@@ -27,9 +35,18 @@ describe('App', () => {
       rejectedOffers: 0
     })
 
+    vi.mocked(login).mockResolvedValue(undefined)
+  })
+
+  it('should render the application name', async () => {
     render(<App />)
 
     expect(screen.getByText('Job-Radar')).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(getOffers).toHaveBeenCalledWith({})
+      expect(getDashboard).toHaveBeenCalled()
+    })
   })
 
   it('should load and display the job offers', async () => {
@@ -54,7 +71,9 @@ describe('App', () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(screen.getByText('Java Developer')).toBeInTheDocument()
+      expect(
+        screen.getByText('Java Developer')
+      ).toBeInTheDocument()
     })
 
     expect(getOffers).toHaveBeenCalledWith({})
@@ -65,13 +84,6 @@ describe('App', () => {
     vi.mocked(getOffers).mockRejectedValue(
       new Error('No se pudieron obtener las ofertas')
     )
-
-    vi.mocked(getDashboard).mockResolvedValue({
-      totalOffers: 0,
-      pendingOffers: 0,
-      appliedOffers: 0,
-      rejectedOffers: 0
-    })
 
     render(<App />)
 
@@ -106,15 +118,21 @@ describe('App', () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(screen.getByText('Java Developer')).toBeInTheDocument()
+      expect(
+        screen.getByText('Java Developer')
+      ).toBeInTheDocument()
     })
 
     fireEvent.change(screen.getByLabelText('Empresa'), {
-      target: { value: 'Empresa A' }
+      target: {
+        value: 'Empresa A'
+      }
     })
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Filtrar' })
+      screen.getByRole('button', {
+        name: 'Filtrar'
+      })
     )
 
     await waitFor(() => {
@@ -125,8 +143,6 @@ describe('App', () => {
   })
 
   it('should login the user when submitting the login form', async () => {
-    vi.mocked(login).mockResolvedValue(undefined)
-
     render(<App />)
 
     fireEvent.change(screen.getByLabelText('Email'), {
