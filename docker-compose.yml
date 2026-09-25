@@ -16,6 +16,34 @@ services:
     volumes:
       - opc-job-radar-data:/var/lib/postgresql/data
 
+  backend:
+    image: job-radar-backend:latest
+    container_name: job-radar-backend
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/opc_job_radar
+      DB_USERNAME: opc
+      DB_PASSWORD: opc
+
+    ports:
+      - "8080:8080"
+
+  frontend:
+    image: job-radar-frontend:latest
+    container_name: job-radar-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "80:80"
+
 volumes:
   opc-job-radar-data:
     driver: local

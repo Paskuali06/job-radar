@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import type { JobOfferFilters } from './offerService'
+import type {
+  JobOfferFilters,
+  JobOfferStatus
+} from './offerService'
 
 type OfferFiltersProps = {
   onFilter: (filters: JobOfferFilters) => void
@@ -34,7 +37,7 @@ function OfferFilters({ onFilter }: OfferFiltersProps) {
     }
 
     if (status) {
-      filters.status = status
+      filters.status = status as JobOfferStatus
     }
 
     if (search) {
