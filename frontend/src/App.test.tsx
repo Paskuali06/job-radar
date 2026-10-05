@@ -6,12 +6,16 @@ import {
 } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
-import { login } from './auth/authService'
+import {
+  getAuthenticatedUser,
+  login
+} from './auth/authService'
 import { getOffers } from './offers/offerService'
 import { getDashboard } from './dashboard/dashboardService'
 
 vi.mock('./auth/authService', () => ({
-  login: vi.fn()
+  login: vi.fn(),
+  getAuthenticatedUser: vi.fn()
 }))
 
 vi.mock('./offers/offerService', () => ({
@@ -25,6 +29,13 @@ vi.mock('./dashboard/dashboardService', () => ({
 describe('App', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+
+    vi.mocked(getAuthenticatedUser).mockResolvedValue({
+      id: 1,
+      name: 'Usuario',
+      email: 'usuario@email.com',
+      role: 'USER'
+    })
 
     vi.mocked(getOffers).mockResolvedValue([])
 
@@ -41,7 +52,11 @@ describe('App', () => {
   it('should render the application name', async () => {
     render(<App />)
 
-    expect(screen.getByText('Job-Radar')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(getAuthenticatedUser).toHaveBeenCalled()
+    })
+
+    expect(screen.getByText('JOB-RADAR')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(getOffers).toHaveBeenCalledWith({})
@@ -143,7 +158,13 @@ describe('App', () => {
   })
 
   it('should login the user when submitting the login form', async () => {
+    vi.mocked(getAuthenticatedUser).mockResolvedValue(null)
+
     render(<App />)
+
+    await waitFor(() => {
+      expect(getAuthenticatedUser).toHaveBeenCalled()
+    })
 
     fireEvent.change(screen.getByLabelText('Email'), {
       target: {
@@ -172,11 +193,17 @@ describe('App', () => {
   })
 
   it('should show an error when login fails', async () => {
+    vi.mocked(getAuthenticatedUser).mockResolvedValue(null)
+
     vi.mocked(login).mockRejectedValue(
       new Error('No se pudo iniciar sesión')
     )
 
     render(<App />)
+
+    await waitFor(() => {
+      expect(getAuthenticatedUser).toHaveBeenCalled()
+    })
 
     fireEvent.change(screen.getByLabelText('Email'), {
       target: {

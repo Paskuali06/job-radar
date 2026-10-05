@@ -14,12 +14,13 @@ describe('authService', () => {
     expect(fetchMock).toHaveBeenCalledWith('/auth/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({
+      body: new URLSearchParams({
         email: 'usuario@email.com',
         password: 'password123'
-      })
+      }),
+      credentials: 'include'
     })
   })
 

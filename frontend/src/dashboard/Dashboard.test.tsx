@@ -1,4 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import {
+  render,
+  screen,
+  waitFor
+} from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import Dashboard from './Dashboard'
 import { getDashboard } from './dashboardService'
@@ -22,9 +26,9 @@ describe('Dashboard', () => {
       expect(screen.getByText('10')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('6')).toBeInTheDocument()
-    expect(screen.getByText('3')).toBeInTheDocument()
-    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getAllByText('6')).toHaveLength(2)
+    expect(screen.getAllByText('3')).toHaveLength(2)
+    expect(screen.getAllByText('1')).toHaveLength(2)
   })
 
   it('should render zero metrics', async () => {
@@ -38,13 +42,15 @@ describe('Dashboard', () => {
     render(<Dashboard />)
 
     await waitFor(() => {
-      expect(screen.getAllByText('0')).toHaveLength(4)
+      expect(screen.getAllByText('0')).toHaveLength(7)
     })
   })
 
   it('should show an error when loading the dashboard fails', async () => {
     vi.mocked(getDashboard).mockRejectedValue(
-      new Error('No se pudieron obtener los datos del dashboard')
+      new Error(
+        'No se pudieron obtener los datos del dashboard'
+      )
     )
 
     render(<Dashboard />)

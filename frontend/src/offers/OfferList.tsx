@@ -80,7 +80,7 @@ function OfferList({ offers }: OfferListProps) {
   }
 
   if (offers.length === 0) {
-    return <p>No hay ofertas</p>
+    return <p className="empty-state">No hay ofertas</p>
   }
 
   const visibleOffers = offers.filter(
@@ -88,128 +88,227 @@ function OfferList({ offers }: OfferListProps) {
   )
 
   if (visibleOffers.length === 0) {
-    return <p>No hay ofertas</p>
+    return <p className="empty-state">No hay ofertas</p>
   }
 
   return (
-    <section>
+    <section className="offers-list">
       {visibleOffers.map((offer) => {
         const status = updatedStatuses[offer.id] ?? offer.status
 
         if (editingOfferId === offer.id) {
           return (
-            <article key={offer.id}>
-              <label htmlFor={`company-${offer.id}`}>Empresa</label>
-              <input
-                id={`company-${offer.id}`}
-                value={editForm.company}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    company: event.target.value
-                  })
-                }
-              />
+            <article
+              key={offer.id}
+              className="offer-card offer-edit-card"
+            >
+              <div className="offer-card-header">
+                <div>
+                  <p className="offer-company">
+                    Editando oferta
+                  </p>
 
-              <label htmlFor={`title-${offer.id}`}>Título</label>
-              <input
-                id={`title-${offer.id}`}
-                value={editForm.title}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    title: event.target.value
-                  })
-                }
-              />
+                  <h3 className="offer-title">
+                    {offer.title}
+                  </h3>
+                </div>
+              </div>
 
-              <label htmlFor={`location-${offer.id}`}>Ubicación</label>
-              <input
-                id={`location-${offer.id}`}
-                value={editForm.location ?? ''}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    location: event.target.value
-                  })
-                }
-              />
+              <div className="offer-edit-grid">
+                <div className="field">
+                  <label
+                    className="field-label"
+                    htmlFor={`company-${offer.id}`}
+                  >
+                    Empresa
+                  </label>
 
-              <label htmlFor={`workMode-${offer.id}`}>Modalidad</label>
-              <input
-                id={`workMode-${offer.id}`}
-                value={editForm.workMode ?? ''}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    workMode: event.target.value
-                  })
-                }
-              />
+                  <input
+                    id={`company-${offer.id}`}
+                    value={editForm.company}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        company: event.target.value
+                      })
+                    }
+                  />
+                </div>
 
-              <label htmlFor={`url-${offer.id}`}>URL</label>
-              <input
-                id={`url-${offer.id}`}
-                value={editForm.url}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    url: event.target.value
-                  })
-                }
-              />
+                <div className="field">
+                  <label
+                    className="field-label"
+                    htmlFor={`title-${offer.id}`}
+                  >
+                    Título
+                  </label>
 
-              <label htmlFor={`description-${offer.id}`}>
-                Descripción
-              </label>
-              <textarea
-                id={`description-${offer.id}`}
-                value={editForm.description ?? ''}
-                onChange={(event) =>
-                  setEditForm({
-                    ...editForm,
-                    description: event.target.value
-                  })
-                }
-              />
+                  <input
+                    id={`title-${offer.id}`}
+                    value={editForm.title}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        title: event.target.value
+                      })
+                    }
+                  />
+                </div>
 
-              <button type="button" onClick={handleSaveEdit}>
-                Guardar cambios
-              </button>
+                <div className="field">
+                  <label
+                    className="field-label"
+                    htmlFor={`location-${offer.id}`}
+                  >
+                    Ubicación
+                  </label>
+
+                  <input
+                    id={`location-${offer.id}`}
+                    value={editForm.location ?? ''}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        location: event.target.value
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label
+                    className="field-label"
+                    htmlFor={`workMode-${offer.id}`}
+                  >
+                    Modalidad
+                  </label>
+
+                  <input
+                    id={`workMode-${offer.id}`}
+                    value={editForm.workMode ?? ''}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        workMode: event.target.value
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label
+                    className="field-label"
+                    htmlFor={`url-${offer.id}`}
+                  >
+                    URL
+                  </label>
+
+                  <input
+                    id={`url-${offer.id}`}
+                    value={editForm.url}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        url: event.target.value
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label
+                    className="field-label"
+                    htmlFor={`description-${offer.id}`}
+                  >
+                    Descripción
+                  </label>
+
+                  <textarea
+                    id={`description-${offer.id}`}
+                    value={editForm.description ?? ''}
+                    onChange={(event) =>
+                      setEditForm({
+                        ...editForm,
+                        description: event.target.value
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="offer-actions">
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={handleSaveEdit}
+                >
+                  Guardar cambios
+                </button>
+              </div>
             </article>
           )
         }
 
         return (
-          <article key={offer.id}>
-            <h2>{offer.title}</h2>
-            <p>{offer.company}</p>
-            <p>{offer.location}</p>
-            <p>{offer.workMode}</p>
-            <p>{status}</p>
+          <article
+            key={offer.id}
+            className="offer-card"
+          >
+            <div className="offer-card-header">
+              <div>
+                <p className="offer-company">
+                  {offer.company}
+                </p>
 
-            {status !== 'SOLICITADA' && (
+                <h3 className="offer-title">
+                  {offer.title}
+                </h3>
+              </div>
+
+              <span
+                className={`offer-status ${status.toLowerCase()}`}
+              >
+                {status}
+              </span>
+            </div>
+
+            <div className="offer-meta">
+              {offer.location && (
+                <span>{offer.location}</span>
+              )}
+
+              {offer.workMode && (
+                <span>{offer.workMode}</span>
+              )}
+            </div>
+
+            <div className="offer-actions">
+              {status !== 'SOLICITADA' && (
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() => handleApply(offer.id)}
+                >
+                  Marcar como aplicada
+                </button>
+              )}
+
               <button
                 type="button"
-                onClick={() => handleApply(offer.id)}
+                className="btn secondary"
+                onClick={() => handleEdit(offer)}
               >
-                Marcar como aplicada
+                Editar oferta
               </button>
-            )}
 
-            <button
-              type="button"
-              onClick={() => handleEdit(offer)}
-            >
-              Editar oferta
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleDelete(offer.id)}
-            >
-              Eliminar oferta
-            </button>
+              <button
+                type="button"
+                className="btn danger"
+                onClick={() => handleDelete(offer.id)}
+              >
+                Eliminar oferta
+              </button>
+            </div>
           </article>
         )
       })}

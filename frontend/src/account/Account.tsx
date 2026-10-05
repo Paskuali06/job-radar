@@ -8,6 +8,7 @@ import {
 function Account() {
   const [account, setAccount] = useState<AccountData | null>(null)
   const [error, setError] = useState('')
+  const [isOpen, setIsOpen] = useState(false)
 
   const loadAccount = async () => {
     try {
@@ -44,22 +45,43 @@ function Account() {
   }
 
   return (
-    <section>
-      <h2>Cuenta</h2>
-
-      <p>{account.name}</p>
-      <p>{account.email}</p>
-      <p>{account.role}</p>
-
+    <div className="account-menu">
       <button
         type="button"
-        onClick={handleLogout}
+        className="account-trigger"
+        aria-label="Abrir cuenta"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
       >
-        Cerrar sesión
+        {account.name}
       </button>
 
-      {error && <p>{error}</p>}
-    </section>
+      {isOpen && (
+        <div className="account-dropdown">
+          <p className="account-dropdown-name">
+            {account.name}
+          </p>
+
+          <p className="account-dropdown-email">
+            {account.email}
+          </p>
+
+          <button
+            type="button"
+            className="btn danger block"
+            onClick={handleLogout}
+          >
+            Cerrar sesión
+          </button>
+
+          {error && (
+            <p className="form-error">
+              {error}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
