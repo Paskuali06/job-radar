@@ -8,7 +8,7 @@ Cada usuario dispone de sus propias ofertas y únicamente puede acceder y modifi
 
 ## Estado del proyecto
 
-El proyecto se encuentra actualmente en fase de desarrollo.
+El proyecto alcanza su primera release funcional **1.0**.
 
 Actualmente existe:
 
@@ -54,7 +54,15 @@ Actualmente existe:
 
 * API HTTP/REST para las funcionalidades implementadas.
 
-* 135 tests automatizados en verde.
+* Configuración de producción mediante variables de entorno.
+
+* Ejecución mediante Docker y Docker Compose.
+
+* Health check mediante Spring Boot Actuator.
+
+* Swagger/OpenAPI desactivado en producción.
+
+* **203 tests automatizados en verde.**
 
 No se utiliza `score`, `classification` ni ningún sistema de puntuación o clasificación automática de ofertas.
 
