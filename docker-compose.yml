@@ -17,6 +17,9 @@ services:
       - opc-job-radar-data:/var/lib/postgresql/data
 
   backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: job-radar-backend:latest
     container_name: job-radar-backend
     restart: unless-stopped
@@ -34,6 +37,9 @@ services:
       - "8080:8080"
 
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     image: job-radar-frontend:latest
     container_name: job-radar-frontend
     restart: unless-stopped

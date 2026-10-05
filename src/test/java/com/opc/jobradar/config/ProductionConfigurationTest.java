@@ -1,6 +1,7 @@
 package com.opc.jobradar.config;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,16 +9,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProductionConfigurationTest {
 
     private final ApplicationContextRunner contextRunner =
-            new ApplicationContextRunner();
+        new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
+                .withSystemProperties("spring.profiles.active=prod");
 
     @Test
     void shouldLoadDatabaseConfigurationFromEnvironmentVariables() {
         contextRunner
                 .withPropertyValues(
-                        "spring.profiles.active=prod",
-                        "spring.datasource.url=jdbc:postgresql://production:5432/jobradar",
-                        "spring.datasource.username=production-user",
-                        "spring.datasource.password=production-password"
+                        "DB_URL=jdbc:postgresql://production:5432/jobradar",
+                        "DB_USERNAME=production-user",
+                        "DB_PASSWORD=production-password"
                 )
                 .run(context -> {
                     assertThat(
@@ -38,4 +40,47 @@ class ProductionConfigurationTest {
                     ).isEqualTo("production-password");
                 });
     }
+
+    @Test
+    void shouldDisableApiDocsInProduction() {
+        contextRunner
+                .run(context -> {
+                    assertThat(
+                            context.getEnvironment()
+                                    .getProperty("springdoc.api-docs.enabled")
+                    ).isEqualTo("false");
+                });
+    }
+
+    @Test
+    void shouldDisableSwaggerUiInProduction() {
+        contextRunner
+                .run(context -> {
+                    assertThat(
+                            context.getEnvironment()
+                                    .getProperty("springdoc.swagger-ui.enabled")
+                    ).isEqualTo("false");
+                });
+    }
+    @Test
+    void shouldExposeOnlyHealthActuatorEndpointInProduction() {
+        contextRunner
+            .run(context -> {
+                assertThat(
+                        context.getEnvironment()
+                                .getProperty("management.endpoints.web.exposure.include")
+                ).isEqualTo("health");
+            });
+}
+
+        @Test
+        void shouldNotExposeHealthDetailsInProduction() {
+                contextRunner
+                        .run(context -> {
+                                assertThat(
+                                        context.getEnvironment()
+                                .getProperty("management.endpoint.health.show-details")
+                ).isEqualTo("never");
+            });
+}
 }
