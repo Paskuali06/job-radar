@@ -9,9 +9,9 @@ main {
 
 .section {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 32px clamp(16px, 4vw, 40px);
+  padding: 32px clamp(20px, 4vw, 48px);
 }
 
 .section-header {
@@ -168,24 +168,78 @@ main {
 
 .filters {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 16px;
+  padding: 20px;
   margin-bottom: 24px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
 }
 
-.filters-grid {
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.filters-title {
+  margin: 0;
+  font: 600 1.25rem/1.2 var(--display);
+}
+
+.filters-subtitle {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.filters-main {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns:
+    minmax(180px, 2fr)
+    repeat(4, minmax(120px, 1fr));
   gap: 12px;
 }
 
-.filter-actions {
+.filters-advanced {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.filters-advanced summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.filters-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.filters .field {
+  min-width: 0;
+}
+
+.filters .field-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.filters .filter-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  margin-top: 2px;
+}
+
+.filters .filter-actions .btn {
+  min-width: 100px;
 }
 
 /* Cuenta */
@@ -296,6 +350,7 @@ main {
 .offer-meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-top: 14px;
 }
@@ -308,11 +363,24 @@ main {
   font-size: 0.8rem;
 }
 
+.offer-url {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 0;
+  color: var(--sonar);
+}
+
 .offer-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 18px;
+}
+
+.status-select {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
 }
 
 .offer-edit-grid {
@@ -328,6 +396,12 @@ main {
   border-radius: 10px;
   color: var(--muted);
   text-align: center;
+}
+
+/* Formulario añadir oferta */
+
+.add-offer-form {
+  margin-bottom: 32px;
 }
 
 /* Login */
@@ -430,12 +504,24 @@ main {
 
 /* Responsive */
 
+@media (max-width: 1050px) {
+  .filters-main {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .filters-advanced-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 850px) {
   .dashboard-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
-  .filters-grid {
+@media (max-width: 750px) {
+  .filters-main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -456,11 +542,17 @@ main {
   .offer-actions .btn {
     width: 100%;
   }
+
+  .status-select {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
 }
 
 @media (max-width: 560px) {
-  .dashboard-grid,
-  .filters-grid {
+  .filters-main,
+  .filters-advanced-grid {
     grid-template-columns: 1fr;
   }
 
@@ -471,12 +563,12 @@ main {
     flex-direction: column;
   }
 
-  .filter-actions {
+  .filters .filter-actions {
     justify-content: stretch;
   }
 
-  .filter-actions .btn {
-    flex: 1;
+  .filters .filter-actions .btn {
+    width: 100%;
   }
 
   .login-wrapper {

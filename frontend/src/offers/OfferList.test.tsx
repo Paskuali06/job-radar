@@ -23,6 +23,7 @@ describe('OfferList', () => {
         title: 'Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
+        url: 'https://example.com/job-1',
         status: 'PENDIENTE'
       },
       {
@@ -31,6 +32,7 @@ describe('OfferList', () => {
         title: 'Spring Boot Developer',
         location: 'Barcelona',
         workMode: 'HYBRID',
+        url: 'https://example.com/job-2',
         status: 'SOLICITADA'
       }
     ]
@@ -48,6 +50,15 @@ describe('OfferList', () => {
     expect(screen.getByText('Barcelona')).toBeInTheDocument()
     expect(screen.getByText('HYBRID')).toBeInTheDocument()
     expect(screen.getByText('SOLICITADA')).toBeInTheDocument()
+
+    const offerLinks = screen.getAllByRole('link', {
+      name: 'Ver oferta'
+    })
+
+    expect(offerLinks[0]).toHaveAttribute(
+      'href',
+      'https://example.com/job-1'
+    )
   })
 
   it('should show a message when there are no job offers', () => {
@@ -56,7 +67,7 @@ describe('OfferList', () => {
     expect(screen.getByText('No hay ofertas')).toBeInTheDocument()
   })
 
-  it('should update the offer status when clicking the button', async () => {
+  it('should update the offer status when changing the state', async () => {
     vi.mocked(updateOfferStatus).mockResolvedValue(undefined)
 
     const offers: JobOffer[] = [
@@ -72,16 +83,24 @@ describe('OfferList', () => {
 
     render(<OfferList offers={offers} />)
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Marcar como aplicada' })
+    fireEvent.change(
+      screen.getByLabelText('Estado'),
+      {
+        target: {
+          value: 'SOLICITADA'
+        }
+      }
     )
 
     await waitFor(() => {
-      expect(updateOfferStatus).toHaveBeenCalledWith(1, 'SOLICITADA')
+      expect(updateOfferStatus).toHaveBeenCalledWith(
+        1,
+        'SOLICITADA'
+      )
     })
   })
 
-  it('should show the updated status after applying an offer', async () => {
+  it('should show the updated status after changing the state', async () => {
     vi.mocked(updateOfferStatus).mockResolvedValue(undefined)
 
     const offers: JobOffer[] = [
@@ -97,17 +116,94 @@ describe('OfferList', () => {
 
     render(<OfferList offers={offers} />)
 
-    expect(screen.getByText('PENDIENTE')).toBeInTheDocument()
+    expect(
+      screen.getByText('PENDIENTE')
+    ).toBeInTheDocument()
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Marcar como aplicada' })
+    fireEvent.change(
+      screen.getByLabelText('Estado'),
+      {
+        target: {
+          value: 'SOLICITADA'
+        }
+      }
     )
 
     await waitFor(() => {
-      expect(screen.getByText('SOLICITADA')).toBeInTheDocument()
+      expect(
+        screen.getByText('SOLICITADA')
+      ).toBeInTheDocument()
     })
 
-    expect(screen.queryByText('PENDIENTE')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('PENDIENTE')
+    ).not.toBeInTheDocument()
+  })
+
+  it('should change the offer status to RECHAZADA', async () => {
+    vi.mocked(updateOfferStatus).mockResolvedValue(undefined)
+
+    const offers: JobOffer[] = [
+      {
+        id: 1,
+        company: 'Empresa A',
+        title: 'Java Developer',
+        location: 'Madrid',
+        workMode: 'REMOTE',
+        status: 'PENDIENTE'
+      }
+    ]
+
+    render(<OfferList offers={offers} />)
+
+    fireEvent.change(
+      screen.getByLabelText('Estado'),
+      {
+        target: {
+          value: 'RECHAZADA'
+        }
+      }
+    )
+
+    await waitFor(() => {
+      expect(updateOfferStatus).toHaveBeenCalledWith(
+        1,
+        'RECHAZADA'
+      )
+    })
+  })
+
+  it('should change the offer status to PENDIENTE', async () => {
+    vi.mocked(updateOfferStatus).mockResolvedValue(undefined)
+
+    const offers: JobOffer[] = [
+      {
+        id: 1,
+        company: 'Empresa A',
+        title: 'Java Developer',
+        location: 'Madrid',
+        workMode: 'REMOTE',
+        status: 'SOLICITADA'
+      }
+    ]
+
+    render(<OfferList offers={offers} />)
+
+    fireEvent.change(
+      screen.getByLabelText('Estado'),
+      {
+        target: {
+          value: 'PENDIENTE'
+        }
+      }
+    )
+
+    await waitFor(() => {
+      expect(updateOfferStatus).toHaveBeenCalledWith(
+        1,
+        'PENDIENTE'
+      )
+    })
   })
 
   it('should delete the offer when clicking the delete button', async () => {
@@ -127,7 +223,9 @@ describe('OfferList', () => {
     render(<OfferList offers={offers} />)
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Eliminar oferta' })
+      screen.getByRole('button', {
+        name: 'Eliminar oferta'
+      })
     )
 
     await waitFor(() => {
@@ -145,6 +243,7 @@ describe('OfferList', () => {
         title: 'Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
+        url: 'https://example.com/job-1',
         status: 'PENDIENTE'
       }
     ]
@@ -152,19 +251,27 @@ describe('OfferList', () => {
     render(<OfferList offers={offers} />)
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Editar oferta' })
+      screen.getByRole('button', {
+        name: 'Editar oferta'
+      })
     )
 
     fireEvent.change(screen.getByLabelText('Empresa'), {
-      target: { value: 'Empresa Nueva' }
+      target: {
+        value: 'Empresa Nueva'
+      }
     })
 
     fireEvent.change(screen.getByLabelText('Título'), {
-      target: { value: 'Senior Java Developer' }
+      target: {
+        value: 'Senior Java Developer'
+      }
     })
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Guardar cambios' })
+      screen.getByRole('button', {
+        name: 'Guardar cambios'
+      })
     )
 
     await waitFor(() => {
@@ -173,9 +280,37 @@ describe('OfferList', () => {
         title: 'Senior Java Developer',
         location: 'Madrid',
         workMode: 'REMOTE',
-        url: '',
+        url: 'https://example.com/job-1',
         description: ''
       })
     })
+  })
+
+  it('should show the existing URL when editing an offer', () => {
+    const offers: JobOffer[] = [
+      {
+        id: 1,
+        company: 'Empresa A',
+        title: 'Java Developer',
+        location: 'Madrid',
+        workMode: 'REMOTE',
+        url: 'https://example.com/job-1',
+        status: 'PENDIENTE'
+      }
+    ]
+
+    render(<OfferList offers={offers} />)
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Editar oferta'
+      })
+    )
+
+    expect(
+      screen.getByLabelText('URL')
+    ).toHaveValue(
+      'https://example.com/job-1'
+    )
   })
 })

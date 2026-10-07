@@ -38,15 +38,6 @@ function OfferList({ offers }: OfferListProps) {
     description: ''
   })
 
-  const handleApply = async (id: number) => {
-    await updateOfferStatus(id, 'SOLICITADA')
-
-    setUpdatedStatuses((currentStatuses) => ({
-      ...currentStatuses,
-      [id]: 'SOLICITADA'
-    }))
-  }
-
   const handleDelete = async (id: number) => {
     await deleteOffer(id)
 
@@ -64,7 +55,7 @@ function OfferList({ offers }: OfferListProps) {
       title: offer.title,
       location: offer.location ?? '',
       workMode: offer.workMode ?? '',
-      url: '',
+      url: offer.url ?? '',
       description: ''
     })
   }
@@ -77,6 +68,18 @@ function OfferList({ offers }: OfferListProps) {
     await updateOffer(editingOfferId, editForm)
 
     setEditingOfferId(null)
+  }
+
+  const handleStatusChange = async (
+    id: number,
+    newStatus: JobOfferStatus
+  ) => {
+    await updateOfferStatus(id, newStatus)
+
+    setUpdatedStatuses((currentStatuses) => ({
+      ...currentStatuses,
+      [id]: newStatus
+    }))
   }
 
   if (offers.length === 0) {
@@ -280,18 +283,44 @@ function OfferList({ offers }: OfferListProps) {
               {offer.workMode && (
                 <span>{offer.workMode}</span>
               )}
+
+              {offer.url && (
+                <a
+                  className="offer-url"
+                  href={offer.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver oferta
+                </a>
+              )}
             </div>
 
             <div className="offer-actions">
-              {status !== 'SOLICITADA' && (
-                <button
-                  type="button"
-                  className="btn primary"
-                  onClick={() => handleApply(offer.id)}
-                >
-                  Marcar como aplicada
-                </button>
-              )}
+              <select
+                id={`status-${offer.id}`}
+                className="status-select"
+                aria-label="Estado"
+                value={status}
+                onChange={(event) =>
+                  handleStatusChange(
+                    offer.id,
+                    event.target.value as JobOfferStatus
+                  )
+                }
+              >
+                <option value="PENDIENTE">
+                  Pendiente
+                </option>
+
+                <option value="SOLICITADA">
+                  Solicitada
+                </option>
+
+                <option value="RECHAZADA">
+                  Rechazada
+                </option>
+              </select>
 
               <button
                 type="button"

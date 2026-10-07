@@ -52,48 +52,50 @@ describe('OfferFilters', () => {
 
     expect(onFilter).toHaveBeenCalledWith({})
   })
+
   it('should submit sorting filters', () => {
-  const onFilter = vi.fn()
+    const onFilter = vi.fn()
 
-  render(<OfferFilters onFilter={onFilter} />)
+    render(<OfferFilters onFilter={onFilter} />)
 
-  fireEvent.change(screen.getByLabelText('Ordenar por'), {
-    target: { value: 'createdAt' }
+    fireEvent.change(screen.getByLabelText('Ordenar por'), {
+      target: { value: 'createdAt' }
+    })
+
+    fireEvent.change(screen.getByLabelText('Dirección'), {
+      target: { value: 'desc' }
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Filtrar' })
+    )
+
+    expect(onFilter).toHaveBeenCalledWith({
+      sortBy: 'createdAt',
+      sortDirection: 'desc'
+    })
   })
 
-  fireEvent.change(screen.getByLabelText('Dirección'), {
-    target: { value: 'desc' }
+  it('should submit pagination filters', () => {
+    const onFilter = vi.fn()
+
+    render(<OfferFilters onFilter={onFilter} />)
+
+    fireEvent.change(screen.getByLabelText('Ofertas por página'), {
+      target: { value: '20' }
+    })
+
+    fireEvent.change(screen.getByLabelText('Página'), {
+      target: { value: '2' }
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Filtrar' })
+    )
+
+    expect(onFilter).toHaveBeenCalledWith({
+      page: 2,
+      size: 20
+    })
   })
-
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Filtrar' })
-  )
-
-  expect(onFilter).toHaveBeenCalledWith({
-    sortBy: 'createdAt',
-    sortDirection: 'desc'
-  })
-})
-it('should submit pagination filters', () => {
-  const onFilter = vi.fn()
-
-  render(<OfferFilters onFilter={onFilter} />)
-
-  fireEvent.change(screen.getByLabelText('Ofertas por página'), {
-    target: { value: '20' }
-  })
-
-  fireEvent.change(screen.getByLabelText('Página'), {
-    target: { value: '2' }
-  })
-
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Filtrar' })
-  )
-
-  expect(onFilter).toHaveBeenCalledWith({
-    page: 2,
-    size: 20
-  })
-})
 })

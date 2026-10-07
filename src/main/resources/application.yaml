@@ -3,7 +3,7 @@ spring:
     name: job-radar
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/opc_job_radar}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/job_radar}
     username: ${DB_USERNAME:opc}
     password: ${DB_PASSWORD:opc}
     driver-class-name: org.postgresql.Driver

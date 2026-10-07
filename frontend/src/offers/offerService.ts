@@ -9,6 +9,7 @@ export type JobOffer = {
   title: string
   location: string | null
   workMode: string | null
+  url?: string
   status: JobOfferStatus
 }
 
@@ -22,6 +23,14 @@ export type JobOfferFilters = {
   sortDirection?: string
   page?: number
   size?: number
+}
+
+export type CreateJobOfferData = {
+  company: string
+  title: string
+  location: string | null
+  workMode: string | null
+  url: string
 }
 
 export type UpdateJobOfferData = {
@@ -81,6 +90,32 @@ export const getOffers = async (
 
   if (!response.ok) {
     throw new Error('No se pudieron obtener las ofertas')
+  }
+
+  return response.json()
+}
+
+export const createOffer = async (
+  data: CreateJobOfferData
+): Promise<JobOffer> => {
+  const response = await fetch('/job-offers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      company: data.company,
+      title: data.title,
+      location: data.location,
+      workMode: data.workMode,
+      url: data.url,
+      source: 'MANUAL',
+      externalId: data.url
+    })
+  })
+
+  if (!response.ok) {
+    throw new Error('No se pudo crear la oferta')
   }
 
   return response.json()

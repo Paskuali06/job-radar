@@ -139,4 +139,21 @@ class JobOfferIntegrationTest {
 
         return entity;
     }
+    @Test
+    void shouldPersistJobOfferWithLongExternalId() {
+    JobOffer jobOffer = createJobOffer(userId);
+
+    String longExternalId =
+            "https://empleo.metrica-global.com/desarrollador-a-backend-java-microservicios-1jhqpLCORw5r/?utm_source=linkedin&utm_medium=job_board&src=linkedin";
+
+    jobOffer.setExternalId(longExternalId);
+
+    JobOffer savedJobOffer =
+            createJobOfferService.create(jobOffer);
+
+    assertEquals(
+            longExternalId,
+            savedJobOffer.getExternalId()
+    );
+}
 }

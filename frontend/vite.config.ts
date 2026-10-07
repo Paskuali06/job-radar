@@ -8,6 +8,14 @@ export default defineConfig({
       '/auth': {
         target: 'http://localhost:8080',
         changeOrigin: true
+      },
+      '/job-offers': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/dashboard': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
       }
     }
   }

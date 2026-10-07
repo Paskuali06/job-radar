@@ -1,0 +1,2 @@
+ALTER TABLE job_offer
+ALTER COLUMN external_id TYPE TEXT;
