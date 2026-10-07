@@ -1,8 +1,8 @@
 # Job-Radar DB
 
-Job-Radar DB es una aplicación backend orientada a la gestión, persistencia y seguimiento de ofertas de empleo.
+Job-Radar DB es una aplicación web para gestionar y realizar el seguimiento de ofertas de empleo.
 
-El objetivo del proyecto es construir una base sólida para recibir, almacenar, identificar y gestionar ofertas de diferentes fuentes, evitando duplicados y manteniendo una arquitectura clara y mantenible.
+El proyecto permite registrar ofertas, almacenarlas de forma persistente, filtrarlas y gestionar su estado durante el proceso de búsqueda de empleo.
 
 Cada usuario dispone de sus propias ofertas y únicamente puede acceder y modificar las ofertas que le pertenecen.
 
@@ -12,83 +12,66 @@ El proyecto alcanza su primera release funcional **1.0**.
 
 Actualmente existe:
 
-* Modelo de dominio `JobOffer`.
-
-* Gestión de usuarios y roles.
-
-* Registro de usuarios.
-
-* Autenticación mediante login y sesión HTTP.
-
-* Aislamiento de ofertas por usuario.
-
-* Creación de ofertas.
-
-* Consulta de ofertas por ID.
-
-* Listado y filtrado de ofertas.
-
-* Actualización de ofertas.
-
-* Cambio de estado de ofertas.
-
-* Eliminación de ofertas.
-
-* Historial de cambios de estado.
-
-* Validación de datos de entrada.
-
-* Validación del formato de las URL.
-
-* Prevención de ofertas duplicadas.
-
-* Identidad de ofertas mediante `user_id + source + external_id`.
-
-* Restricción de unicidad en base de datos para `user_id + source + external_id`.
-
-* Persistencia mediante Spring Data JPA.
-
-* PostgreSQL como base de datos.
-
-* Migraciones mediante Flyway.
-
-* API HTTP/REST para las funcionalidades implementadas.
-
-* Configuración de producción mediante variables de entorno.
-
-* Ejecución mediante Docker y Docker Compose.
-
-* Health check mediante Spring Boot Actuator.
-
-* Swagger/OpenAPI desactivado en producción.
-
-* **203 tests automatizados en verde.**
+- Modelo de dominio `JobOffer`.
+- Gestión de usuarios y roles.
+- Registro de usuarios.
+- Autenticación mediante login y sesión HTTP.
+- Aislamiento de ofertas por usuario.
+- Creación manual de ofertas.
+- Consulta de ofertas.
+- Listado y filtrado de ofertas.
+- Actualización de ofertas.
+- Cambio de estado de ofertas.
+- Historial de cambios de estado.
+- Eliminación de ofertas.
+- Confirmación de eliminación desde el frontend.
+- Validación de datos de entrada.
+- Validación del formato de las URL.
+- Identidad de ofertas mediante `user_id + source + external_id`.
+- Restricciones de integridad y unicidad en base de datos.
+- Persistencia mediante Spring Data JPA.
+- PostgreSQL como base de datos.
+- Migraciones mediante Flyway.
+- API HTTP/REST.
+- Frontend desarrollado con React y Vite.
+- Configuración de producción mediante variables de entorno.
+- Ejecución mediante Docker y Docker Compose.
+- Health check mediante Spring Boot Actuator.
+- Swagger/OpenAPI desactivado en producción.
+- Tests automatizados de backend y frontend.
 
 No se utiliza `score`, `classification` ni ningún sistema de puntuación o clasificación automática de ofertas.
 
 ## Stack tecnológico
 
-* Java 21
+### Backend
 
-* Spring Boot
+- Java 21
+- Spring Boot
+- Maven
+- Spring Data JPA / Hibernate
+- PostgreSQL
+- Flyway
+- JUnit
+- Mockito
 
-* Maven
+### Frontend
 
-* PostgreSQL
+- React
+- TypeScript
+- Vite
+- Vitest
+- Testing Library
 
-* Spring Data JPA / Hibernate
+### Infraestructura
 
-* Flyway
-
-* JUnit
-
-* Mockito
-
-* Docker / Docker Compose
+- Docker
+- Docker Compose
+- Nginx
 
 ## Arquitectura
 
-El proyecto sigue una arquitectura hexagonal, manteniendo separadas las responsabilidades de dominio, aplicación e infraestructura.
+El backend sigue una arquitectura hexagonal, manteniendo separadas las responsabilidades de dominio, aplicación e infraestructura.
 
 ```text
                 ┌─────────────────────┐
