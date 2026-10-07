@@ -666,7 +666,15 @@ class JobOfferJpaRepositoryTest {
         repository.save(firstOffer);
         repository.save(secondOffer);
 
-        assertEquals(2, repository.count());
+        assertEquals(
+                1,
+                repository.countByUserId(userId)
+        );
+
+        assertEquals(
+                1,
+                repository.countByUserId(secondUserId)
+        );
     }
 
     @Test
@@ -736,7 +744,10 @@ class JobOfferJpaRepositoryTest {
         repository.save(firstOffer);
         repository.save(secondOffer);
 
-        assertEquals(2, repository.count());
+        assertEquals(
+                2,
+                repository.countByUserId(userId)
+        );
     }
 
     @Test
@@ -953,7 +964,6 @@ class JobOfferJpaRepositoryTest {
 
     private UserEntity createUser(String email) {
         UserEntity user = new UserEntity();
-
         user.setName("Test User");
         user.setEmail(email);
         user.setPassword("password");
@@ -990,107 +1000,109 @@ class JobOfferJpaRepositoryTest {
 
         return entity;
     }
+
     @Test
     void shouldCountAllJobOffersBelongingToUser() {
-    JobOfferEntity firstOffer = createJobOffer(
-            "Empresa A",
-            "Backend Developer",
-            "Madrid",
-            "REMOTO",
-            "PENDIENTE",
-            "https://example.com/job-a",
-            "LinkedIn",
-            "job-a"
-    );
+        JobOfferEntity firstOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-a"
+        );
 
-    JobOfferEntity secondOffer = createJobOffer(
-            "Empresa B",
-            "Java Developer",
-            "Barcelona",
-            "HIBRIDO",
-            "SOLICITADA",
-            "https://example.com/job-b",
-            "Indeed",
-            "job-b"
-    );
+        JobOfferEntity secondOffer = createJobOffer(
+                "Empresa B",
+                "Java Developer",
+                "Barcelona",
+                "HIBRIDO",
+                "SOLICITADA",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-b"
+        );
 
-    JobOfferEntity otherUserOffer = createJobOffer(
-            "Empresa C",
-            "Full Stack Developer",
-            "Sevilla",
-            "REMOTO",
-            "RECHAZADA",
-            "https://example.com/job-c",
-            "InfoJobs",
-            "job-c"
-    );
+        JobOfferEntity otherUserOffer = createJobOffer(
+                "Empresa C",
+                "Full Stack Developer",
+                "Sevilla",
+                "REMOTO",
+                "RECHAZADA",
+                "https://example.com/job-c",
+                "InfoJobs",
+                "job-c"
+        );
 
-    otherUserOffer.setUserId(secondUserId);
+        otherUserOffer.setUserId(secondUserId);
 
-    repository.save(firstOffer);
-    repository.save(secondOffer);
-    repository.save(otherUserOffer);
+        repository.save(firstOffer);
+        repository.save(secondOffer);
+        repository.save(otherUserOffer);
 
-    long result = repository.countByUserId(userId);
+        long result = repository.countByUserId(userId);
 
-    assertEquals(2, result);
-}
+        assertEquals(2, result);
+    }
 
     @Test
     void shouldCountJobOffersByUserAndStatus() {
-    JobOfferEntity pendingOffer = createJobOffer(
-            "Empresa A",
-            "Backend Developer",
-            "Madrid",
-            "REMOTO",
-            "PENDIENTE",
-            "https://example.com/job-a",
-            "LinkedIn",
-            "job-a"
-    );
+        JobOfferEntity pendingOffer = createJobOffer(
+                "Empresa A",
+                "Backend Developer",
+                "Madrid",
+                "REMOTO",
+                "PENDIENTE",
+                "https://example.com/job-a",
+                "LinkedIn",
+                "job-a"
+        );
 
-    JobOfferEntity requestedOffer = createJobOffer(
-            "Empresa B",
-            "Java Developer",
-            "Barcelona",
-            "HIBRIDO",
-            "SOLICITADA",
-            "https://example.com/job-b",
-            "Indeed",
-            "job-b"
-    );
-    JobOfferEntity rejectedOffer = createJobOffer(
-        "Empresa C",
-        "Full Stack Developer",
-        "Sevilla",
-        "REMOTO",
-        "RECHAZADA",
-        "https://example.com/job-c",
-        "InfoJobs",
-        "job-c"
-);
+        JobOfferEntity requestedOffer = createJobOffer(
+                "Empresa B",
+                "Java Developer",
+                "Barcelona",
+                "HIBRIDO",
+                "SOLICITADA",
+                "https://example.com/job-b",
+                "Indeed",
+                "job-b"
+        );
 
-repository.save(pendingOffer);
-repository.save(requestedOffer);
-repository.save(rejectedOffer);
+        JobOfferEntity rejectedOffer = createJobOffer(
+                "Empresa C",
+                "Full Stack Developer",
+                "Sevilla",
+                "REMOTO",
+                "RECHAZADA",
+                "https://example.com/job-c",
+                "InfoJobs",
+                "job-c"
+        );
 
-long pendingResult = repository.countByUserIdAndStatus(
-        userId,
-        "PENDIENTE"
-);
+        repository.save(pendingOffer);
+        repository.save(requestedOffer);
+        repository.save(rejectedOffer);
 
-long requestedResult = repository.countByUserIdAndStatus(
-        userId,
-        "SOLICITADA"
-);
+        long pendingResult = repository.countByUserIdAndStatus(
+                userId,
+                "PENDIENTE"
+        );
 
-long rejectedResult = repository.countByUserIdAndStatus(
-        userId,
-        "RECHAZADA"
-);
+        long requestedResult = repository.countByUserIdAndStatus(
+                userId,
+                "SOLICITADA"
+        );
 
-    assertEquals(1, pendingResult);
-    assertEquals(1, requestedResult);
-    assertEquals(1, rejectedResult);
-}
+        long rejectedResult = repository.countByUserIdAndStatus(
+                userId,
+                "RECHAZADA"
+        );
+
+        assertEquals(1, pendingResult);
+        assertEquals(1, requestedResult);
+        assertEquals(1, rejectedResult);
+    }
 }

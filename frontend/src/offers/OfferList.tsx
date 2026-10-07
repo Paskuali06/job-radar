@@ -29,6 +29,11 @@ function OfferList({ offers }: OfferListProps) {
 
   const [editingOfferId, setEditingOfferId] = useState<number | null>(null)
 
+  const [deleteConfirmationId, setDeleteConfirmationId] =
+    useState<number | null>(null)
+
+  const [deleteError, setDeleteError] = useState(false)
+
   const [editForm, setEditForm] = useState<EditFormData>({
     company: '',
     title: '',
@@ -38,13 +43,25 @@ function OfferList({ offers }: OfferListProps) {
     description: ''
   })
 
-  const handleDelete = async (id: number) => {
-    await deleteOffer(id)
+  const handleDelete = async () => {
+    if (deleteConfirmationId === null) {
+      return
+    }
 
-    setDeletedOffers((currentDeletedOffers) => [
-      ...currentDeletedOffers,
-      id
-    ])
+    try {
+      setDeleteError(false)
+
+      await deleteOffer(deleteConfirmationId)
+
+      setDeletedOffers((currentDeletedOffers) => [
+        ...currentDeletedOffers,
+        deleteConfirmationId
+      ])
+
+      setDeleteConfirmationId(null)
+    } catch {
+      setDeleteError(true)
+    }
   }
 
   const handleEdit = (offer: JobOffer) => {
@@ -95,253 +112,294 @@ function OfferList({ offers }: OfferListProps) {
   }
 
   return (
-    <section className="offers-list">
-      {visibleOffers.map((offer) => {
-        const status = updatedStatuses[offer.id] ?? offer.status
+    <>
+      {deleteConfirmationId !== null && (
+        <div className="delete-modal">
+          <div className="delete-modal-content">
+            <h3>Eliminar oferta</h3>
 
-        if (editingOfferId === offer.id) {
+            <p>
+              ¿Seguro que quieres eliminar esta oferta?
+            </p>
+
+            {deleteError && (
+              <p className="form-error">
+                No se pudo eliminar la oferta
+              </p>
+            )}
+
+            <div className="offer-actions">
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => setDeleteConfirmationId(null)}
+              >
+                No
+              </button>
+
+              <button
+                type="button"
+                className="btn danger"
+                onClick={handleDelete}
+              >
+                Sí
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <section className="offers-list">
+        {visibleOffers.map((offer) => {
+          const status = updatedStatuses[offer.id] ?? offer.status
+
+          if (editingOfferId === offer.id) {
+            return (
+              <article
+                key={offer.id}
+                className="offer-card offer-edit-card"
+              >
+                <div className="offer-card-header">
+                  <div>
+                    <p className="offer-company">
+                      Editando oferta
+                    </p>
+
+                    <h3 className="offer-title">
+                      {offer.title}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="offer-edit-grid">
+                  <div className="field">
+                    <label
+                      className="field-label"
+                      htmlFor={`company-${offer.id}`}
+                    >
+                      Empresa
+                    </label>
+
+                    <input
+                      id={`company-${offer.id}`}
+                      value={editForm.company}
+                      onChange={(event) =>
+                        setEditForm({
+                          ...editForm,
+                          company: event.target.value
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label
+                      className="field-label"
+                      htmlFor={`title-${offer.id}`}
+                    >
+                      Título
+                    </label>
+
+                    <input
+                      id={`title-${offer.id}`}
+                      value={editForm.title}
+                      onChange={(event) =>
+                        setEditForm({
+                          ...editForm,
+                          title: event.target.value
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label
+                      className="field-label"
+                      htmlFor={`location-${offer.id}`}
+                    >
+                      Ubicación
+                    </label>
+
+                    <input
+                      id={`location-${offer.id}`}
+                      value={editForm.location ?? ''}
+                      onChange={(event) =>
+                        setEditForm({
+                          ...editForm,
+                          location: event.target.value
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label
+                      className="field-label"
+                      htmlFor={`workMode-${offer.id}`}
+                    >
+                      Modalidad
+                    </label>
+
+                    <input
+                      id={`workMode-${offer.id}`}
+                      value={editForm.workMode ?? ''}
+                      onChange={(event) =>
+                        setEditForm({
+                          ...editForm,
+                          workMode: event.target.value
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label
+                      className="field-label"
+                      htmlFor={`url-${offer.id}`}
+                    >
+                      URL
+                    </label>
+
+                    <input
+                      id={`url-${offer.id}`}
+                      value={editForm.url}
+                      onChange={(event) =>
+                        setEditForm({
+                          ...editForm,
+                          url: event.target.value
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label
+                      className="field-label"
+                      htmlFor={`description-${offer.id}`}
+                    >
+                      Descripción
+                    </label>
+
+                    <textarea
+                      id={`description-${offer.id}`}
+                      value={editForm.description ?? ''}
+                      onChange={(event) =>
+                        setEditForm({
+                          ...editForm,
+                          description: event.target.value
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="offer-actions">
+                  <button
+                    type="button"
+                    className="btn primary"
+                    onClick={handleSaveEdit}
+                  >
+                    Guardar cambios
+                  </button>
+                </div>
+              </article>
+            )
+          }
+
           return (
             <article
               key={offer.id}
-              className="offer-card offer-edit-card"
+              className="offer-card"
             >
               <div className="offer-card-header">
                 <div>
                   <p className="offer-company">
-                    Editando oferta
+                    {offer.company}
                   </p>
 
                   <h3 className="offer-title">
                     {offer.title}
                   </h3>
                 </div>
+
+                <span
+                  className={`offer-status ${status.toLowerCase()}`}
+                >
+                  {status}
+                </span>
               </div>
 
-              <div className="offer-edit-grid">
-                <div className="field">
-                  <label
-                    className="field-label"
-                    htmlFor={`company-${offer.id}`}
+              <div className="offer-meta">
+                {offer.location && (
+                  <span>{offer.location}</span>
+                )}
+
+                {offer.workMode && (
+                  <span>{offer.workMode}</span>
+                )}
+
+                {offer.url && (
+                  <a
+                    className="offer-url"
+                    href={offer.url}
+                    target="_blank"
+                    rel="noreferrer"
                   >
-                    Empresa
-                  </label>
-
-                  <input
-                    id={`company-${offer.id}`}
-                    value={editForm.company}
-                    onChange={(event) =>
-                      setEditForm({
-                        ...editForm,
-                        company: event.target.value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="field">
-                  <label
-                    className="field-label"
-                    htmlFor={`title-${offer.id}`}
-                  >
-                    Título
-                  </label>
-
-                  <input
-                    id={`title-${offer.id}`}
-                    value={editForm.title}
-                    onChange={(event) =>
-                      setEditForm({
-                        ...editForm,
-                        title: event.target.value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="field">
-                  <label
-                    className="field-label"
-                    htmlFor={`location-${offer.id}`}
-                  >
-                    Ubicación
-                  </label>
-
-                  <input
-                    id={`location-${offer.id}`}
-                    value={editForm.location ?? ''}
-                    onChange={(event) =>
-                      setEditForm({
-                        ...editForm,
-                        location: event.target.value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="field">
-                  <label
-                    className="field-label"
-                    htmlFor={`workMode-${offer.id}`}
-                  >
-                    Modalidad
-                  </label>
-
-                  <input
-                    id={`workMode-${offer.id}`}
-                    value={editForm.workMode ?? ''}
-                    onChange={(event) =>
-                      setEditForm({
-                        ...editForm,
-                        workMode: event.target.value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="field">
-                  <label
-                    className="field-label"
-                    htmlFor={`url-${offer.id}`}
-                  >
-                    URL
-                  </label>
-
-                  <input
-                    id={`url-${offer.id}`}
-                    value={editForm.url}
-                    onChange={(event) =>
-                      setEditForm({
-                        ...editForm,
-                        url: event.target.value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="field">
-                  <label
-                    className="field-label"
-                    htmlFor={`description-${offer.id}`}
-                  >
-                    Descripción
-                  </label>
-
-                  <textarea
-                    id={`description-${offer.id}`}
-                    value={editForm.description ?? ''}
-                    onChange={(event) =>
-                      setEditForm({
-                        ...editForm,
-                        description: event.target.value
-                      })
-                    }
-                  />
-                </div>
+                    Ver oferta
+                  </a>
+                )}
               </div>
 
               <div className="offer-actions">
+                <select
+                  id={`status-${offer.id}`}
+                  className="status-select"
+                  aria-label="Estado"
+                  value={status}
+                  onChange={(event) =>
+                    handleStatusChange(
+                      offer.id,
+                      event.target.value as JobOfferStatus
+                    )
+                  }
+                >
+                  <option value="PENDIENTE">
+                    Pendiente
+                  </option>
+
+                  <option value="SOLICITADA">
+                    Solicitada
+                  </option>
+
+                  <option value="RECHAZADA">
+                    Rechazada
+                  </option>
+                </select>
+
                 <button
                   type="button"
-                  className="btn primary"
-                  onClick={handleSaveEdit}
+                  className="btn secondary"
+                  onClick={() => handleEdit(offer)}
                 >
-                  Guardar cambios
+                  Editar oferta
+                </button>
+
+                <button
+                  type="button"
+                  className="btn danger"
+                  onClick={() => {
+                    setDeleteError(false)
+                    setDeleteConfirmationId(offer.id)
+                  }}
+                >
+                  Eliminar oferta
                 </button>
               </div>
             </article>
           )
-        }
-
-        return (
-          <article
-            key={offer.id}
-            className="offer-card"
-          >
-            <div className="offer-card-header">
-              <div>
-                <p className="offer-company">
-                  {offer.company}
-                </p>
-
-                <h3 className="offer-title">
-                  {offer.title}
-                </h3>
-              </div>
-
-              <span
-                className={`offer-status ${status.toLowerCase()}`}
-              >
-                {status}
-              </span>
-            </div>
-
-            <div className="offer-meta">
-              {offer.location && (
-                <span>{offer.location}</span>
-              )}
-
-              {offer.workMode && (
-                <span>{offer.workMode}</span>
-              )}
-
-              {offer.url && (
-                <a
-                  className="offer-url"
-                  href={offer.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Ver oferta
-                </a>
-              )}
-            </div>
-
-            <div className="offer-actions">
-              <select
-                id={`status-${offer.id}`}
-                className="status-select"
-                aria-label="Estado"
-                value={status}
-                onChange={(event) =>
-                  handleStatusChange(
-                    offer.id,
-                    event.target.value as JobOfferStatus
-                  )
-                }
-              >
-                <option value="PENDIENTE">
-                  Pendiente
-                </option>
-
-                <option value="SOLICITADA">
-                  Solicitada
-                </option>
-
-                <option value="RECHAZADA">
-                  Rechazada
-                </option>
-              </select>
-
-              <button
-                type="button"
-                className="btn secondary"
-                onClick={() => handleEdit(offer)}
-              >
-                Editar oferta
-              </button>
-
-              <button
-                type="button"
-                className="btn danger"
-                onClick={() => handleDelete(offer.id)}
-              >
-                Eliminar oferta
-              </button>
-            </div>
-          </article>
-        )
-      })}
-    </section>
+        })}
+      </section>
+    </>
   )
 }
 

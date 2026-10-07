@@ -109,7 +109,15 @@ class PersistenceIntegrationTest {
                 createJobOffer(secondUser.getId(), "LinkedIn", "same-id")
         );
 
-        assertEquals(2, jobOfferRepository.count());
+        assertEquals(
+                1,
+                jobOfferRepository.countByUserId(firstUser.getId())
+        );
+
+        assertEquals(
+                1,
+                jobOfferRepository.countByUserId(secondUser.getId())
+        );
     }
 
     @Test

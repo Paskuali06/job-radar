@@ -16,7 +16,8 @@ import java.util.Optional;
  * El adaptador de persistencia lo utiliza para materializar el puerto de
  * salida del dominio mediante consultas derivadas de Spring Data.
  */
-public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Long> {
+public interface JobOfferJpaRepository
+        extends JpaRepository<JobOfferEntity, Long> {
 
     boolean existsByUrl(String url);
 
@@ -28,7 +29,12 @@ public interface JobOfferJpaRepository extends JpaRepository<JobOfferEntity, Lon
             String externalId
     );
 
-    Optional<JobOfferEntity> findByIdAndUserId(Long id, Long userId);
+    Optional<JobOfferEntity> findByIdAndUserId(
+            Long id,
+            Long userId
+    );
+
+    List<JobOfferEntity> findAllByUserId(Long userId);
 
     long countByUserId(Long userId);
 

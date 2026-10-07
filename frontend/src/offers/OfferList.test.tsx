@@ -206,7 +206,7 @@ describe('OfferList', () => {
     })
   })
 
-  it('should delete the offer when clicking the delete button', async () => {
+  it('should delete the offer after confirming deletion', async () => {
     vi.mocked(deleteOffer).mockResolvedValue(undefined)
 
     const offers: JobOffer[] = [
@@ -228,9 +228,64 @@ describe('OfferList', () => {
       })
     )
 
+    expect(
+      screen.getByText(
+        '¿Seguro que quieres eliminar esta oferta?'
+      )
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Sí'
+      })
+    )
+
     await waitFor(() => {
       expect(deleteOffer).toHaveBeenCalledWith(1)
     })
+  })
+
+  it('should not delete the offer when cancelling deletion', async () => {
+    vi.mocked(deleteOffer).mockResolvedValue(undefined)
+
+    const offers: JobOffer[] = [
+      {
+        id: 1,
+        company: 'Empresa A',
+        title: 'Java Developer',
+        location: 'Madrid',
+        workMode: 'REMOTE',
+        status: 'PENDIENTE'
+      }
+    ]
+
+    render(<OfferList offers={offers} />)
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Eliminar oferta'
+      })
+    )
+
+    expect(
+      screen.getByText(
+        '¿Seguro que quieres eliminar esta oferta?'
+      )
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'No'
+      })
+    )
+
+    expect(deleteOffer).not.toHaveBeenCalled()
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Eliminar oferta'
+      })
+    ).toBeInTheDocument()
   })
 
   it('should update the offer when saving the edit form', async () => {
